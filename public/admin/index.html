@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walima — Admin</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f4f1ea;color:#22201b;font-size:15px}
+  a{color:#7c1f31}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+  h1{font-size:22px;margin:0;font-weight:600;letter-spacing:.01em}
+  h1 small{color:#8a8478;font-weight:400;font-size:14px;margin-left:8px}
+  button{font:inherit;cursor:pointer;border-radius:7px;border:1px solid #cfc7b6;background:#fff;padding:9px 14px;transition:background .15s,border-color .15s}
+  button:hover{background:#f0ece2}
+  button.primary{background:#7c1f31;border-color:#7c1f31;color:#fff}
+  button.primary:hover{background:#671826}
+  button.small{padding:5px 10px;font-size:13px}
+  button.danger{color:#a12a2a;border-color:#e0b8b8}
+  button.danger:hover{background:#fbeaea}
+  button[disabled]{opacity:.5;cursor:default}
+  input,select{font:inherit;padding:9px 11px;border:1px solid #cfc7b6;border-radius:7px;background:#fff;outline:none}
+  input:focus,select:focus{border-color:#7c1f31}
+  .card{background:#fff;border:1px solid #e6e0d2;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);padding:20px;margin-bottom:20px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+  .stat{background:#faf8f2;border:1px solid #ece6d8;border-radius:10px;padding:14px 16px;text-align:center}
+  .stat b{display:block;font-size:28px;font-weight:600;line-height:1.1}
+  .stat span{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#8a8478}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .toolbar .grow{flex:1;min-width:160px}
+  .seg{display:inline-flex;border:1px solid #cfc7b6;border-radius:7px;overflow:hidden}
+  .seg button{border:0;border-radius:0;border-right:1px solid #e2dccd;background:#fff;padding:8px 13px;font-size:13px}
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:#7c1f31;color:#fff}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #eee7d8;vertical-align:top}
+  th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#8a8478;cursor:pointer;user-select:none;white-space:nowrap}
+  th.sorted:after{content:' \25B4';color:#7c1f31}
+  th.sorted.desc:after{content:' \25BE'}
+  tr:hover td{background:#faf8f2}
+  .tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;letter-spacing:.02em;white-space:nowrap}
+  .tag.accepted{background:#e0f0e6;color:#1c6c47;border:1px solid #a9d8bf}
+  .tag.declined{background:#f6e2e2;color:#9a3030;border:1px solid #e0b0b0}
+  .tag.none{background:#efece3;color:#8a8478;border:1px solid #ddd6c6}
+  .muted{color:#8a8478}
+  .req{background:#fff8e8;border:1px solid #ecdcae;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  .req .who{font-weight:600}
+  .req .reason{margin:6px 0 10px;color:#4a453b}
+  .req .row{display:flex;gap:8px}
+  .login{max-width:360px;margin:12vh auto 0}
+  .login h1{margin-bottom:16px}
+  .login .card>*{width:100%;margin-bottom:12px}
+  .err{color:#a12a2a;font-size:14px}
+  .empty{color:#8a8478;text-align:center;padding:30px}
+  .add-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+  .add-row .f{display:flex;flex-direction:column;gap:4px}
+  .add-row label{font-size:12px;color:#8a8478;text-transform:uppercase;letter-spacing:.04em}
+  @media(max-width:640px){ .hide-sm{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- LOGIN -->
+  <div id="login" class="login">
+    <h1>Walima — Admin</h1>
+    <div class="card">
+      <input id="pw" type="password" placeholder="Admin password" autocomplete="current-password">
+      <button class="primary" style="width:100%" onclick="Admin.login()">Sign in</button>
+      <div id="login-err" class="err" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel" style="display:none">
+    <header>
+      <h1>Walima — Admin <small id="hdr-count"></small></h1>
+      <div style="display:flex;gap:10px">
+        <button onclick="Admin.refresh()">Refresh</button>
+        <button onclick="Admin.exportCsv()">Export CSV</button>
+        <button onclick="Admin.logout()">Sign out</button>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div id="requests-card" class="card" style="display:none">
+      <h3 style="margin:0 0 12px">Change requests <span id="req-count" class="muted"></span></h3>
+      <div id="requests"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 14px">Add a guest to the whitelist</h3>
+      <div class="add-row">
+        <div class="f"><label>Name</label><input id="ng-name" placeholder="Full name"></div>
+        <div class="f"><label>Phone</label><input id="ng-phone" inputmode="tel" placeholder="Phone number"></div>
+        <div class="f"><label>Language</label><select id="ng-lang"><option value="en">English</option><option value="ur">اردو</option></select></div>
+        <button class="primary" onclick="Admin.addGuest()">Add guest</button>
+      </div>
+      <div id="add-err" class="err" style="margin-top:10px;display:none"></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <input id="search" class="grow" placeholder="Search name or phone…" oninput="Admin.render()">
+        <div class="seg" id="filter">
+          <button class="on" data-f="all" onclick="Admin.setFilter('all')">All</button>
+          <button data-f="accepted" onclick="Admin.setFilter('accepted')">Accepted</button>
+          <button data-f="declined" onclick="Admin.setFilter('declined')">Declined</button>
+          <button data-f="none" onclick="Admin.setFilter('none')">No response</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr id="head"></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function api(path, opts){
+    opts=opts||{};
+    return fetch(path, Object.assign({credentials:'same-origin',headers:{'Content-Type':'application/json'}}, opts))
+      .then(function(r){ if(r.status===401){ Admin._show('login'); throw new Error('unauth'); }
+        var ct=r.headers.get('content-type')||''; if(ct.indexOf('application/json')<0) return r; 
+        return r.json().then(function(j){ j._status=r.status; return j; }); });
+  }
+
+  var COLS=[
+    {k:'name',   t:'Name'},
+    {k:'phone',  t:'Phone', cls:'hide-sm'},
+    {k:'status', t:'Status'},
+    {k:'party',  t:'Party'},
+    {k:'message',t:'Message', cls:'hide-sm'},
+    {k:'submitted', t:'Responded', cls:'hide-sm'}
+  ];
+
+  var Admin = {
+    guests:[], requests:[], filter:'all', sortKey:'name', sortDir:1,
+
+    _show:function(which){ $('login').style.display = which==='login'?'block':'none'; $('panel').style.display = which==='panel'?'block':'none'; },
+
+    login:function(){
+      var pw=$('pw').value;
+      $('login-err').style.display='none';
+      api('/api/admin/login',{method:'POST',body:JSON.stringify({password:pw})}).then(function(j){
+        if(j&&j.ok){ $('pw').value=''; Admin._show('panel'); Admin.refresh(); }
+        else { $('login-err').textContent=(j&&j.error)||'Incorrect password'; $('login-err').style.display='block'; }
+      }).catch(function(e){ if(String(e).indexOf('unauth')<0){ $('login-err').textContent='Sign-in failed.'; $('login-err').style.display='block'; } });
+    },
+    logout:function(){ document.cookie='walima_admin=; Path=/; Max-Age=0'; location.reload(); },
+
+    refresh:function(){
+      Promise.all([
+        api('/api/admin/guests').then(function(j){ return (j&&j.guests)||[]; }),
+        api('/api/admin/edit-requests').then(function(j){ return (j&&j.requests)||[]; })
+      ]).then(function(res){ Admin.guests=res[0]; Admin.requests=res[1]; Admin.renderStats(); Admin.renderRequests(); Admin.render(); })
+      .catch(function(){});
+    },
+
+    setFilter:function(f){ this.filter=f; Array.prototype.forEach.call($('filter').children,function(b){ b.className = b.dataset.f===f?'on':''; }); this.render(); },
+    sortBy:function(k){ if(this.sortKey===k) this.sortDir*=-1; else { this.sortKey=k; this.sortDir=1; } this.render(); },
+
+    _norm:function(g){
+      var status = g.attending==null ? 'none' : (g.attending?'accepted':'declined');
+      return { id:g.id, name:g.name||'', phone:g.phone||'', language:g.language||'en',
+        status:status, party:g.attending?(g.party_size||1):0, message:g.message||'',
+        submitted:g.submitted_at?new Date(g.submitted_at).getTime():0 };
+    },
+
+    renderStats:function(){
+      var rows=this.guests.map(this._norm), s={sent:rows.length,accepted:0,declined:0,none:0,heads:0};
+      rows.forEach(function(r){ if(r.status==='accepted'){s.accepted++;s.heads+=r.party;} else if(r.status==='declined')s.declined++; else s.none++; });
+      $('hdr-count').textContent = s.sent+' invited';
+      $('stats').innerHTML =
+        stat(s.sent,'Invited')+stat(s.accepted,'Accepted')+stat(s.declined,'Declined')+
+        stat(s.none,'No response')+stat(s.heads,'Total attending');
+      function stat(n,l){ return '<div class="stat"><b>'+n+'</b><span>'+l+'</span></div>'; }
+    },
+
+    renderRequests:function(){
+      var box=$('requests-card'), list=$('requests');
+      if(!this.requests.length){ box.style.display='none'; return; }
+      box.style.display='block';
+      $('req-count').textContent='('+this.requests.length+' pending)';
+      list.innerHTML = this.requests.map(function(r){
+        return '<div class="req"><div class="who">'+esc(r.name)+' <span class="muted">· '+esc(r.phone)+'</span></div>'+
+          '<div class="reason">“'+esc(r.reason)+'”</div>'+
+          '<div class="row"><button class="primary small" onclick="Admin.resolve(\''+r.id+'\',\'approve\')">Approve &amp; reopen RSVP</button>'+
+          '<button class="small" onclick="Admin.resolve(\''+r.id+'\',\'deny\')">Decline</button></div></div>';
+      }).join('');
+    },
+    resolve:function(id,action){
+      api('/api/admin/edit-requests?id='+encodeURIComponent(id)+'&action='+action,{method:'POST'}).then(function(j){ if(j&&j.ok) Admin.refresh(); });
+    },
+
+    render:function(){
+      var q=($('search').value||'').toLowerCase().trim(), f=this.filter, self=this;
+      var rows=this.guests.map(this._norm).filter(function(r){
+        if(f!=='all' && r.status!==f) return false;
+        if(q && (r.name+' '+r.phone).toLowerCase().indexOf(q)<0) return false;
+        return true;
+      });
+      var k=this.sortKey, dir=this.sortDir;
+      rows.sort(function(a,b){ var x=a[k],y=b[k]; if(typeof x==='string'){x=x.toLowerCase();y=(''+y).toLowerCase();} return x<y?-dir:x>y?dir:0; });
+
+      $('head').innerHTML = COLS.map(function(c){
+        var cls=(c.cls?c.cls+' ':'')+(self.sortKey===c.k?('sorted'+(self.sortDir<0?' desc':'')):'');
+        return '<th class="'+cls+'" onclick="Admin.sortBy(\''+c.k+'\')">'+c.t+'</th>';
+      }).join('') + '<th></th>';
+
+      if(!rows.length){ $('rows').innerHTML='<tr><td colspan="'+(COLS.length+1)+'" class="empty">No guests match.</td></tr>'; return; }
+      $('rows').innerHTML = rows.map(function(r){
+        var tag = r.status==='accepted'?'<span class="tag accepted">Accepted</span>'
+                : r.status==='declined'?'<span class="tag declined">Declined</span>'
+                : '<span class="tag none">No response</span>';
+        return '<tr>'+
+          '<td>'+esc(r.name)+' '+(r.language==='ur'?'<span class="muted">· اردو</span>':'')+'</td>'+
+          '<td class="hide-sm">'+esc(r.phone)+'</td>'+
+          '<td>'+tag+'</td>'+
+          '<td>'+(r.status==='accepted'?r.party:'<span class="muted">—</span>')+'</td>'+
+          '<td class="hide-sm">'+(r.message?esc(r.message):'<span class="muted">—</span>')+'</td>'+
+          '<td class="hide-sm muted">'+(r.submitted?new Date(r.submitted).toLocaleDateString():'—')+'</td>'+
+          '<td><button class="small danger" onclick="Admin.removeGuest(\''+r.id+'\',\''+esc(r.name).replace(/\x27/g,"")+'\')">Remove</button></td>'+
+        '</tr>';
+      }).join('');
+    },
+
+    addGuest:function(){
+      var name=$('ng-name').value.trim(), phone=$('ng-phone').value.trim(), lang=$('ng-lang').value;
+      $('add-err').style.display='none';
+      if(!name||!phone){ $('add-err').textContent='Name and phone are required.'; $('add-err').style.display='block'; return; }
+      api('/api/admin/guests',{method:'POST',body:JSON.stringify({name:name,phone:phone,language:lang})}).then(function(j){
+        if(j&&j.ok){ $('ng-name').value=''; $('ng-phone').value=''; Admin.refresh(); }
+        else { $('add-err').textContent=(j&&j.error)||'Could not add guest.'; $('add-err').style.display='block'; }
+      });
+    },
+    removeGuest:function(id,name){
+      if(!confirm('Remove '+name+' from the whitelist? Their RSVP will also be deleted.')) return;
+      api('/api/admin/guests?id='+encodeURIComponent(id),{method:'DELETE'}).then(function(j){ if(j&&j.ok) Admin.refresh(); });
+    },
+    exportCsv:function(){ window.location.href='/api/admin/export'; }
+  };
+
+  window.Admin=Admin;
+  // Probe session: if already signed in, show the panel.
+  api('/api/admin/guests').then(function(j){ if(j&&j.ok){ Admin._show('panel'); Admin.guests=j.guests||[]; Admin.renderStats(); Admin.render();
+    api('/api/admin/edit-requests').then(function(k){ Admin.requests=(k&&k.requests)||[]; Admin.renderRequests(); }); } })
+  .catch(function(){ /* 401 already routed to login */ });
+})();
+</script>
+</body>
+</html>
