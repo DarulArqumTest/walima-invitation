@@ -1046,6 +1046,8 @@
     this.env.position.y=ey;
     if(this.bloom) this.bloom.strength=0.18;
     if(this.interior) this.interior.intensity=0;
+    // dim the scene during the gate, brighten as phone number is entered (readSeep → 1)
+    if(this.ambient) this.ambient.intensity=0.22 + this._readSeep*0.68;
     // RADIAL (zoom) blur driven by camera speed — centre sharp, off entirely at the desk. No flash/exposure ramp.
     if(this.renderer) this.renderer.toneMappingExposure=0.9;
     if(this.radialPass){
@@ -1057,6 +1059,7 @@
     var vg=document.getElementById("wb-vignette"); if(vg) vg.style.opacity=(portal?1:clamp(1-t/0.34,0,1)).toFixed(3);
     if(!portal && t>=1){
       this.phase="await"; this.env.rotation.x=0; this.env.position.y=0;
+      if(this.ambient) this.ambient.intensity=0.9;  // restore to normal brightness when intro completes
       if(this.renderer) this.renderer.toneMappingExposure=0.9;
       if(this.radialPass) this.radialPass.uniforms.strength.value=0;
       if(this.onIntroDone){ var cb=this.onIntroDone; this.onIntroDone=null; cb(); }
