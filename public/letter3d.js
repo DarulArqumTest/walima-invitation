@@ -1047,9 +1047,10 @@
     if(this.bloom) this.bloom.strength=0.18;
     if(this.interior) this.interior.intensity=0;
     // dim the scene during the gate, brighten as phone number is entered (readSeep → 1)
-    if(this.ambient) this.ambient.intensity=0.22 + this._readSeep*0.68;
+    if(this.ambient) this.ambient.intensity=0.18 + this._readSeep*0.72;
     // RADIAL (zoom) blur driven by camera speed — centre sharp, off entirely at the desk. No flash/exposure ramp.
-    if(this.renderer) this.renderer.toneMappingExposure=0.9;
+    // reduce exposure during gate to make it dimmer; brighten as readSeep increases
+    if(this.renderer) this.renderer.toneMappingExposure=portal?0.65:(0.82 + (1-this._readSeep)*0.08);
     if(this.radialPass){
       var cz=this.cam.position.z, spd=(this._lastCamZ==null)?0:Math.abs(this._lastCamZ-cz); this._lastCamZ=cz;
       var target=portal?0:clamp(spd*0.9,0,0.65);
