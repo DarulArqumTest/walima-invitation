@@ -778,10 +778,13 @@
       var g=x.createRadialGradient(W/2,H,4,W/2,H,W*0.7); g.addColorStop(0,"#ffcf82"); g.addColorStop(0.5,"#e0a24e"); g.addColorStop(1,"#6e4420"); x.fillStyle=g; x.fillRect(0,0,W,H);
       for(var vx=0;vx<W;vx+=3){ x.strokeStyle="rgba(255,240,200,"+(Math.random()*0.06)+")"; x.beginPath(); x.moveTo(vx,0); x.lineTo(vx+ (Math.random()-0.5)*2,H); x.stroke(); }   // old drawn-glass streaks
       return new THREE.CanvasTexture(c); })();
-    var transGlass=new THREE.Mesh(new THREE.PlaneGeometry(3.7,0.66), new THREE.MeshBasicMaterial({map:transTex,transparent:true,opacity:0.9,depthWrite:false}));
+    // Basic materials ignore lighting, so these two were the last thing still visible
+    // during the blackout. Kept as refs and faded with the candles (see _setDoors).
+    var transGlass=this.transGlass=new THREE.Mesh(new THREE.PlaneGeometry(3.7,0.66), new THREE.MeshBasicMaterial({map:transTex,transparent:true,opacity:0.9,depthWrite:false}));
     transGlass.position.set(0,4.35,6.58); fw.add(transGlass);            // gradient glass (depthWrite off + separated in Z from the glow → no transparent-sort flicker)
-    var transGlow=new THREE.Mesh(new THREE.PlaneGeometry(3.9,0.9), new THREE.MeshBasicMaterial({map:radialSprite(),color:0xffb45a,transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false}));
+    var transGlow=this.transGlow=new THREE.Mesh(new THREE.PlaneGeometry(3.9,0.9), new THREE.MeshBasicMaterial({map:radialSprite(),color:0xffb45a,transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false}));
     transGlow.position.set(0,4.2,6.68); fw.add(transGlow);              // faint bloom low-centre only
+    this._transBase={glass:0.9, glow:0.22};
     for(var gb=-1;gb<=1;gb++){ var vb=box(0.07,0.7,0.14, hallWood, gb*1.2,4.35,6.66); }   // vertical glazing bars (depth, cast small shadows)
     fw.add(box(3.9,0.06,0.14, hallWood, 0,4.35,6.66));                  // horizontal muntin
     fw.add(box(5.0,0.22,0.6, doorMat, 0,-1.86,6.3));         // walnut threshold at the floor
@@ -1033,6 +1036,14 @@
     var doneFade=1-clamp(cp/0.15,0,1);                     // beam dies on first door motion, gone by 15% open
     var base=seep*0.5*doneFade;
     // every one of these is scaled by seep so nothing leaks light before the first candle
+    if(this.transGlass && this._transBase){
+      this.transGlass.material.opacity=this._transBase.glass*seep;
+      this.transGlass.visible=seep>0.004;
+    }
+    if(this.transGlow && this._transBase){
+      this.transGlow.material.opacity=this._transBase.glow*seep;
+      this.transGlow.visible=seep>0.004;
+    }
     if(this.blade){ this.blade.scale.x=(0.1+seep*0.05); this.blade.material.opacity=Math.min((0.28+base*0.8),0.95)*doneFade*seep; }
     if(this.bladeGlow){ this.bladeGlow.scale.x=0.3+seep*0.35; this.bladeGlow.material.opacity=Math.min(base*0.6,0.6)*doneFade*seep; }
     if(this.floorSpill){ this.floorSpill.scale.set(0.4+gap*1.2, 0.5+gap*0.8, 1); this.floorSpill.material.opacity=Math.min(seep*0.5,0.5)*doneFade*seep; }
