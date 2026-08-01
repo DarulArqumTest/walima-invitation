@@ -21,15 +21,18 @@
   /* THE REVEAL — milliseconds from the moment the phone panel dismisses.
      The music starts at 0 (muffled, behind the door). The vocal on the track begins
      at ~4.5s, which is exactly when the doors part — the singing carries you in. */
+  /* The gate is already pitch black, so there's no fade-to-black to sit through —
+     the plaque can start glowing almost immediately. That shortens the lead-in to
+     the doors to 3.85s; the music trims its intro to match (see audio.js). */
   var REVEAL = {
-    dark:      700,    // panel gone -> fade the hall to black
-    signStart: 700,    // WALIMA plaque begins to glow out of the dark
-    signEnd:  2700,
-    candle1:  2750,    // BAM. first sconce catches
-    candle2:  3600,    // BAM. second sconce — the room becomes visible
-    doorOpen: 4500,    // doors part, camera starts moving, the vocal lands
-    doorEnd:  9800,
-    total:   13000
+    dark:      250,    // nothing to fade — the hall was never lit
+    signStart: 350,    // WALIMA plaque glows up, self-lit, out of total darkness
+    signEnd:  2250,
+    candle1:  2350,    // BAM. first sconce catches
+    candle2:  3150,    // BAM. second sconce — the room appears
+    doorOpen: 3850,    // doors part, camera moves in, the vocal lands
+    doorEnd:  9200,
+    total:   12400
   };
   function easeInOut(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
   function easeOut(t){ return 1-Math.pow(1-t,3); }
@@ -364,11 +367,24 @@
     var fill=this.fill=new THREE.PointLight(0xffe0b0, 1.7, 18, 2.0); fill.position.set(0,0.8,3.4); s.add(fill);
     var faceFill=this.faceFill=new THREE.DirectionalLight(0xfff2da, 0.42); faceFill.position.set(-3.2,3.4,7); s.add(faceFill);  // dim hall wash on the door fronts (keeps hallway dark)
     var upFill=new THREE.PointLight(0x9fe0c4, 0.75, 14, 2.0); upFill.position.set(0,-1.0,3.6); s.add(upFill);
+    /* These are the lights that make the hall visible at all. They are held at ZERO
+       until the candles are struck, so the gate is genuine darkness — the guest sees
+       nothing but the entry panel and has no idea a room is waiting. _setRoomLight()
+       brings them up on the candle beat. */
+    this._roomLights=[{l:rim,b:0.4},{l:top,b:0.6},{l:fill,b:1.7},{l:faceFill,b:0.42},{l:upFill,b:0.75}];
+    this._roomLightF=null;
     var interior=this.interior=new THREE.PointLight(0xffd9a0, 0.0, 5.0, 2.2);
     interior.position.set(0,0.2,0.3); s.add(interior);
     // dedicated camera-side warm fill for the LETTER sequence: keeps whichever face is toward the
     // viewer lit through the flip. Fades in as the sequence begins, out (to a low hold) once settled.
     var letterFill=this.letterFill=new THREE.DirectionalLight(0xffe8c6, 0.0); letterFill.position.set(0.4,1.0,6.5); s.add(letterFill); s.add(letterFill.target);
+  };
+
+  /* f = 0 pitch black hall, 1 fully lit. Cheap: only writes when it actually changes. */
+  WeddingBook.prototype._setRoomLight=function(f){
+    if(!this._roomLights || this._roomLightF===f) return;
+    this._roomLightF=f;
+    for(var i=0;i<this._roomLights.length;i++){ var R=this._roomLights[i]; R.l.intensity=R.b*f; }
   };
 
   WeddingBook.prototype._green=function(shade){
@@ -1021,7 +1037,9 @@
       var glowIn=(this._signGlow==null)?1:this._signGlow;
       var pf=(1-easeInOut(clamp((cp-0.12)/0.56,0,1)))*glowIn;
       this.plaque.material.opacity=pf; this.plaque.visible=pf>0.002;
-      if(this.plaqueGlow) this.plaqueGlow.material.opacity=pf*0.5;
+      // The sign is the only lit thing on screen while the hall is dark, so push the
+      // halo harder then and let it settle back once the candles take over.
+      if(this.plaqueGlow) this.plaqueGlow.material.opacity=pf*(0.5+(1-(this._readSeep||0))*0.5);
     }
   };
 
@@ -1040,7 +1058,8 @@
     this.phase="intro"; this._pStart=this._readT0||performance.now(); this._durIntro=REVEAL.total; this._flashT0=0;
     this._beats={};
     var au=window.WalimaAudio;
-    if(au){ au.startMusic(); au.setMuffle(1, 0.1); }
+    // hand the music the exact lead time so the vocal lands on the door opening
+    if(au){ au.startMusic(REVEAL.doorOpen/1000); au.setMuffle(1, 0.1); }
   };
 
   /* fire a one-shot beat once the reveal clock passes `atMs` */
@@ -1067,9 +1086,12 @@
     // sconce catches at REVEAL.candle1, then up over 1.5s (covering the second strike).
     var rel = this._readT0 ? (now-this._readT0) : -1;
     this._readSeep = (rel<0 || portal) ? 0 : clamp((rel-REVEAL.candle1)/1500,0,1);
-    // the WALIMA plaque glowing up out of total darkness
-    this._signGlow = (rel<0 || portal) ? (portal?1:0)
+    // the WALIMA plaque glowing up out of total darkness — hidden entirely during the
+    // gate so the first thing the guest ever sees in the scene is it fading in
+    this._signGlow = (rel<0 || portal) ? 0
                    : easeInOut(clamp((rel-REVEAL.signStart)/(REVEAL.signEnd-REVEAL.signStart),0,1));
+    // the hall itself only exists once a candle is lit
+    this._setRoomLight(this._readSeep);
     // fade the dim hall to black the instant the panel goes
     this._darkT = (rel<0 || portal) ? 0 : clamp(rel/REVEAL.dark,0,1);
 
@@ -1115,14 +1137,11 @@
     if(this.interior) this.interior.intensity=0;
     // Gate: a dim, readable hall. Then the panel goes and the hall fades to BLACK (darkT),
     // and the only thing that brings it back is the candles catching (readSeep).
-    if(this.ambient){
-      var gateAmb=0.18, darkAmb=0.015;
-      this.ambient.intensity = portal ? gateAmb
-        : lerp(gateAmb, darkAmb, this._darkT) + this._readSeep*0.885;
-    }
+    // Pitch black through the gate and the sign beat; the candles bring the room back.
+    if(this.ambient) this.ambient.intensity = portal ? 0.0 : this._readSeep*0.9;
     // RADIAL (zoom) blur driven by camera speed — centre sharp, off entirely at the desk. No flash/exposure ramp.
-    // gate sits dim; the dark beat pulls exposure down further; the candles bring it back
-    if(this.renderer) this.renderer.toneMappingExposure=portal?0.65:lerp(0.65,0.90,this._readSeep);
+    // exposure comes up with the candles (kept high enough that the self-lit plaque reads)
+    if(this.renderer) this.renderer.toneMappingExposure=lerp(0.80,0.90,this._readSeep);
     if(this.radialPass){
       var cz=this.cam.position.z, spd=(this._lastCamZ==null)?0:Math.abs(this._lastCamZ-cz); this._lastCamZ=cz;
       var target=portal?0:clamp(spd*0.9,0,0.65);
@@ -1173,6 +1192,7 @@
     this._readSeep=1; this._signGlow=0; this._darkT=1;
     if(this.frontWall) this.frontWall.visible=false;
     if(this.ambient) this.ambient.intensity=0.9;
+    if(this._setRoomLight) this._setRoomLight(1);
     if(this.renderer) this.renderer.toneMappingExposure=0.9;
     this.setQuality(1);
   };

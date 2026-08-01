@@ -1,6 +1,6 @@
 /* Walima — audio engine.
    Two jobs:
-     1. MUSIC. Plays song-male.mp3, then song-female.mp3, then loops the pair.
+     1. MUSIC. One custom-edited track carrying both the male and female passages.
         Routed through a lowpass so it can start "behind the door" (muffled, quiet)
         and open up to full clarity as the camera moves through the doorway.
         setMuffle(1) = heard through a closed door.  setMuffle(0) = in the room.
@@ -68,38 +68,40 @@
   }
 
   // ---------- music ----------
-  var TRACKS = ["./assets/audio/song-male.mp3", "./assets/audio/song-female.mp3"];
+  /* ONE custom-edited track containing both the male and the female passage.
+     The vocal enters at VOCAL_AT seconds. We want that entry to land exactly on
+     the door opening, so playback starts at (VOCAL_AT - leadSeconds) — i.e. we
+     trim however much of the intro doesn't fit the reveal. Set startMusic's
+     argument from the reveal timeline and the two stay locked no matter how the
+     choreography is retimed. */
+  var TRACK = "./assets/audio/song.mp3";
+  var VOCAL_AT = 4.5;
 
-  A.startMusic = function () {
+  A.startMusic = function (leadSeconds) {
     if (!A.ready || A._stopped) return;
     if (A._music) return;
-    A._track = 0;
-    playTrack(0);
-    // fade in gently — it should creep in from behind the door
+    var lead = (leadSeconds == null) ? VOCAL_AT : leadSeconds;
+    A._offset = Math.max(0, VOCAL_AT - lead);   // trim the intro down to the lead we have
+    playTrack();
     A._musicGain.gain.cancelScheduledValues(A.ctx.currentTime);
     A._musicGain.gain.setValueAtTime(0.0001, A.ctx.currentTime);
-    A._musicGain.gain.linearRampToValueAtTime(0.34, A.ctx.currentTime + 3.2);
+    A._musicGain.gain.linearRampToValueAtTime(0.34, A.ctx.currentTime + Math.min(3.2, Math.max(0.8, lead * 0.7)));
   };
 
-  function playTrack(i) {
-    var el = A._els[i];
+  function playTrack() {
+    var el = A._els[0];
     if (!el) {
-      el = A._els[i] = new Audio(TRACKS[i]);
+      el = A._els[0] = new Audio(TRACK);
       el.crossOrigin = "anonymous";
       el.preload = "auto";
+      try { A._srcNode = A.ctx.createMediaElementSource(el); A._srcNode.connect(A._musicGain); } catch (e) {}
     }
-    el.currentTime = 0;
     A._music = el;
-    try {
-      if (!el._wired) { A._srcNode = A.ctx.createMediaElementSource(el); A._srcNode.connect(A._musicGain); el._wired = true; }
-      else { /* already routed */ }
-    } catch (e) {}
-    el.onended = function () {
-      if (A._stopped) return;
-      A._track = (A._track + 1) % TRACKS.length;
-      A._music = null;
-      playTrack(A._track);
-    };
+    var seek = function () { try { el.currentTime = A._offset || 0; } catch (e) {} };
+    if (el.readyState >= 1) seek();
+    else el.addEventListener("loadedmetadata", seek, { once: true });
+    // loop the whole edit — it already carries both voices
+    el.loop = true;
     var p = el.play();
     if (p && p.catch) p.catch(function () {});
   }

@@ -116,8 +116,8 @@
       <h3 style="margin:0 0 14px">Add a guest to the whitelist</h3>
       <div class="add-row">
         <div class="f"><label>Name</label><input id="ng-name" placeholder="Full name"></div>
-        <div class="f"><label>Phone</label><input id="ng-phone" inputmode="tel" placeholder="Phone number"></div>
-        <div class="f"><label>Language</label><select id="ng-lang"><option value="en">English</option><option value="ur">اردو</option></select></div>
+        <div class="f"><label>Country</label><select id="ng-cc"></select></div>
+        <div class="f"><label>Phone</label><input id="ng-phone" inputmode="tel" placeholder="000 000 0000"></div>
         <button class="primary" onclick="Admin.addGuest()">Add guest</button>
       </div>
       <div id="add-err" class="err" style="margin-top:10px;display:none"></div>
@@ -184,6 +184,7 @@
   </div>
 </div>
 
+<script src="../content.js"></script>
 <script>
 (function(){
   "use strict";
@@ -359,9 +360,12 @@
     },
 
     addGuest:function(){
-      var name=$('ng-name').value.trim(), phone=$('ng-phone').value.trim(), lang=$('ng-lang').value;
+      var name=$('ng-name').value.trim(), local=$('ng-phone').value.trim(), cc=$('ng-cc').value||'';
+      // store the full international number so it matches whatever the guest types at the gate
+      var phone = local ? (cc + local.replace(/[^\d]/g,'')) : '';
+      var lang='en';
       $('add-err').style.display='none';
-      if(!name||!phone){ $('add-err').textContent='Name and phone are required.'; $('add-err').style.display='block'; return; }
+      if(!name||!local){ $('add-err').textContent='Name and phone are required.'; $('add-err').style.display='block'; return; }
       api('/api/admin/guests',{method:'POST',body:JSON.stringify({name:name,phone:phone,language:lang})}).then(function(j){
         if(j&&j.ok){ $('ng-name').value=''; $('ng-phone').value=''; Admin.refresh(); }
         else { $('add-err').textContent=(j&&j.error)||'Could not add guest.'; $('add-err').style.display='block'; }
@@ -375,6 +379,12 @@
   };
 
   window.Admin=Admin;
+  // dial codes for the add-guest form (shared list from content.js)
+  (function(){
+    var sel=$('ng-cc'), list=window.WalimaDial||[];
+    if(!sel||!list.length) return;
+    sel.innerHTML = list.map(function(d){ return '<option value="'+d[1]+'">'+d[0]+' '+d[1]+' · '+d[2]+'</option>'; }).join('');
+  })();
   // Probe session: if already signed in, show the panel.
   api('/api/admin/guests').then(function(j){ if(j&&j.ok){ Admin._show('panel'); Admin.guests=j.guests||[]; Admin.renderStats(); Admin.render();
     api('/api/admin/edit-requests').then(function(k){ Admin.requests=(k&&k.requests)||[]; Admin.renderRequests(); }); } })

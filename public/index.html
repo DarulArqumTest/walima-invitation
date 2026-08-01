@@ -31,14 +31,15 @@
   .inv-stage{position:absolute;inset:0;bottom:auto;height:100dvh;overflow-y:auto;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;padding:clamp(14px,3.2vw,44px);z-index:6;transition:opacity 1.1s ease;background:rgba(6,4,2,0)}
   .inv-stage:not(.hidden){background:rgba(6,4,2,1);transition:background 1.4s ease 0.3s}
   .inv-wrap{width:100%;max-width:clamp(320px,88vw,600px);margin:auto;display:flex;flex-direction:column;align-items:center}
-  .inv-greet{width:100%;text-align:center;color:#f0dcab;font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.4vw,24px);letter-spacing:.02em;margin:0 0 12px;text-shadow:0 2px 14px rgba(0,0,0,.7)}
-  .inv-greet b{font-weight:600;color:#ffe6b0}
-  .inv-card{position:relative;width:100%;aspect-ratio:900/1160;background-image:url("./assets/card-art-hi.jpg");background-size:100% 100%;background-repeat:no-repeat;border-radius:6px;box-shadow:0 46px 120px -30px rgba(0,0,0,.9);container-type:inline-size;overflow:hidden}
+  .inv-card{position:relative;width:100%;aspect-ratio:1023/1557;background-image:url("./assets/card-pink.jpg");background-size:100% 100%;background-repeat:no-repeat;border-radius:6px;box-shadow:0 46px 120px -30px rgba(0,0,0,.9);container-type:inline-size;overflow:hidden}
   .inv-langtoggle{position:absolute;top:2.4%;right:3%;z-index:4;display:flex;gap:9px;align-items:center;font-size:2.1cqw;letter-spacing:.1em;font-family:'EB Garamond',serif;background:rgba(5,28,22,.6);padding:1% 2.4%;border-radius:20px;border:1px solid rgba(232,200,126,.35);backdrop-filter:blur(2px)}
   .inv-langtoggle span{cursor:pointer;transition:color .2s ease;color:#e8c87e}
   .inv-langtoggle span.off{color:rgba(232,200,126,.45)}
   .inv-langtoggle .sep{cursor:default;color:rgba(232,200,126,.35)}
-  .inv-cartouche{position:absolute;left:32.5%;right:32.5%;top:18%;bottom:25.5%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#3A2A16;transition:opacity .24s ease;gap:.2cqw}
+  /* Text column sits inside the measured cream panel (23.25%-73.15% vertical,
+     26.78%-73.12% horizontal) with a margin, and starts below the arch tip so
+     nothing collides with the curve or the gold border. */
+  .inv-cartouche{position:absolute;left:30%;right:30%;top:27.5%;bottom:29%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#3A2A16;transition:opacity .24s ease;gap:.2cqw}
   .ic-bismillah{font-family:'Noto Nastaliq Urdu','Amiri',serif;font-size:2.2cqw;line-height:1.8;margin-bottom:.3cqw;padding-top:.3cqw;color:#a97f2c}
   .ic-hosts{font-variant:small-caps;letter-spacing:.12em;font-weight:600;font-size:2cqw;line-height:1.3;background:linear-gradient(180deg,#c49a3d,#9c7526);-webkit-background-clip:text;background-clip:text;color:transparent}
   .ic-invite{font-style:italic;font-size:1.78cqw;line-height:1.42;color:#5f4630;margin:.5cqw 0;text-wrap:balance}
@@ -47,11 +48,11 @@
   .ic-with{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:2.2cqw;background:linear-gradient(#c49a3d,#9c7526);-webkit-background-clip:text;background-clip:text;color:transparent}
   .ic-parent{font-style:italic;font-size:1.58cqw;color:#6a4f2c;margin-top:.3cqw;text-wrap:balance}
   .ic-div{width:44%;border-top:1px solid #c8a24e;position:relative;margin:1.6cqw 0}
-  .ic-div:before{content:'\2766';position:absolute;top:-1.4cqw;left:50%;transform:translateX(-50%);color:#b8892f;font-size:2cqw;background:#fbf5e6;padding:0 1.4cqw}
+  .ic-div:before{content:'\2766';position:absolute;top:-1.4cqw;left:50%;transform:translateX(-50%);color:#b8892f;font-size:2cqw;background:#fdf3dc;padding:0 1.4cqw}
   .ic-date{font-size:1.85cqw;color:#3A2A16}
   .ic-venue{font-family:'Cormorant Garamond',serif;font-size:2.5cqw;color:#2e2010;margin-top:.5cqw;line-height:1.1}
   .ic-loc{font-size:1.75cqw;color:#6a4f2c}
-  .inv-ur .inv-cartouche{direction:rtl;gap:.3cqw;left:28%;right:28%;top:16.5%;bottom:24%}
+  .inv-ur .inv-cartouche{direction:rtl;gap:.3cqw;left:28.5%;right:28.5%;top:26.5%;bottom:28%}
   .inv-ur .ic-bismillah{font-size:1.95cqw;line-height:1.5;margin-bottom:.15cqw;padding-top:0}
   .inv-ur .ic-hosts{font-family:'Noto Nastaliq Urdu',serif;font-variant:normal;letter-spacing:0;font-size:1.9cqw;line-height:1.7}
   .inv-ur .ic-invite{font-family:'Noto Nastaliq Urdu',serif;font-style:normal;font-size:1.5cqw;line-height:1.85;margin:.2cqw 0}
@@ -108,12 +109,17 @@
   .fld input{flex:1;width:100%;min-height:54px;padding:14px 16px;border:0;outline:none;background:transparent;color:#F2E2BB;font-size:17px;text-align:left;letter-spacing:.06em;font-family:inherit}
   .fld input::placeholder{color:rgba(232,200,126,.34);letter-spacing:.02em}
   /* country dial code */
+  /* The native <select> sits invisibly on top (so phones get their own picker and
+     the full country list), while the visible face stays compact: flag + code. */
   .cc{position:relative;display:flex;align-items:center;flex:0 0 auto}
   .cc:after{content:'';position:absolute;right:0;top:11px;bottom:11px;width:1px;background:rgba(232,200,126,.24)}
-  .cc select{appearance:none;-webkit-appearance:none;border:0;outline:none;background:transparent;cursor:pointer;
-    color:#E8C87E;font-family:inherit;font-size:16px;letter-spacing:.04em;padding:14px 26px 14px 16px;min-height:54px}
+  .cc-face{display:flex;align-items:center;gap:7px;padding:14px 26px 14px 15px;min-height:54px;
+    color:#E8C87E;font-size:16px;letter-spacing:.04em;white-space:nowrap;pointer-events:none}
+  .cc-face #cc-flag{font-size:19px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+  .cc select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
   .cc select option{background:#100b06;color:#E8C87E}
   .cc .chev{position:absolute;right:11px;pointer-events:none;color:rgba(232,200,126,.6);font-size:9px;line-height:1}
+  .fld:focus-within .cc-face{color:#f6ead0}
   .btn{width:100%;min-height:54px;margin-top:14px;padding:15px 18px;border:0;border-radius:2px;
     background:linear-gradient(#8d6c2f,#5d451b);color:#fff6e0;font-size:12.5px;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;font-family:inherit;
     box-shadow:inset 0 1px 0 rgba(255,236,190,.32), inset 0 -1px 0 rgba(0,0,0,.34), 0 10px 24px -12px rgba(0,0,0,.8);
@@ -184,7 +190,6 @@
   <!-- SETTLED INVITATION -->
   <div id="inv-stage" class="inv-stage hidden" style="opacity:0">
     <div class="inv-wrap">
-      <div id="inv-greet" class="inv-greet"></div>
       <div class="inv-card">
         <div class="inv-langtoggle">
           <span id="lt-en" onclick="App.setLang('en')">EN</span>
@@ -214,8 +219,9 @@
       <div class="lbl-sub">Please confirm your number</div>
       <div id="phone-fld" class="fld">
         <span class="cc">
+          <span class="cc-face" aria-hidden="true"><span id="cc-flag">&#127464;&#127462;</span><span id="cc-code">+1</span></span>
+          <span class="chev" aria-hidden="true">&#9660;</span>
           <select id="cc" aria-label="Country dialling code"></select>
-          <span class="chev">&#9660;</span>
         </span>
         <input id="phone" inputmode="tel" placeholder="000 000 0000" aria-label="Phone number" autocomplete="tel">
       </div>
@@ -262,9 +268,9 @@
   <div id="toast" class="toast hidden"></div>
 </div>
 
-<script src="./content.js"></script>
-<script src="./audio.js?v=1"></script>
-<script src="./letter3d.js?v=20"></script>
+<script src="./content.js?v=2"></script>
+<script src="./audio.js?v=2"></script>
+<script src="./letter3d.js?v=21"></script>
 <script>
 (function(){
   "use strict";
@@ -280,16 +286,7 @@
   }
   function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.add('hidden');},3200); }
 
-  // Dial codes. Canada/US first (the hosts), then Pakistan (the venue), then the rest.
-  var DIAL = [
-    ['+1','Canada / USA'], ['+92','Pakistan'], ['+44','United Kingdom'], ['+971','UAE'],
-    ['+966','Saudi Arabia'], ['+61','Australia'], ['+91','India'], ['+974','Qatar'],
-    ['+965','Kuwait'], ['+973','Bahrain'], ['+968','Oman'], ['+60','Malaysia'],
-    ['+65','Singapore'], ['+27','South Africa'], ['+49','Germany'], ['+33','France'],
-    ['+39','Italy'], ['+31','Netherlands'], ['+46','Sweden'], ['+47','Norway'],
-    ['+353','Ireland'], ['+64','New Zealand'], ['+90','Turkey'], ['+20','Egypt'],
-    ['+880','Bangladesh'], ['+62','Indonesia'], ['+86','China'], ['+81','Japan']
-  ];
+  var DIAL = window.WalimaDial;   // [flag, code, country] — shared with the admin panel
 
   var App = {
     book:null, guest:null, lang:'en', rsvp:null, reduced:false,
@@ -323,10 +320,19 @@
       this.book.onOpened = function(){ self.showInvitation(); };
       this.book.phase = 'portal';
       $('phone').addEventListener('keydown', function(e){ if(e.key==='Enter') self.verify(); });
-      // dial codes
+      // dial codes — full list in the picker, compact flag + code on the face
       var cc=$('cc');
-      cc.innerHTML = DIAL.map(function(d){ return '<option value="'+d[0]+'">'+d[0]+'</option>'; }).join('');
-      cc.title = DIAL.map(function(d){ return d[0]+'  '+d[1]; }).join('\n');
+      cc.innerHTML = DIAL.map(function(d){
+        return '<option value="'+d[1]+'" data-flag="'+d[0]+'">'+d[0]+'  '+d[2]+'  '+d[1]+'</option>';
+      }).join('');
+      cc.addEventListener('change', function(){ self._syncCC(); });
+      this._syncCC();
+    },
+    _syncCC:function(){
+      var cc=$('cc'), o=cc.options[cc.selectedIndex];
+      if(!o) return;
+      $('cc-flag').textContent = o.getAttribute('data-flag')||'';
+      $('cc-code').textContent = o.value;
     },
 
     // ---------- gate ----------
@@ -431,8 +437,6 @@
       $('inv-stage').className = 'inv-stage' + (en?'':' inv-ur');
       $('lt-en').className = en?'':'off';
       $('lt-ur').className = en?'off':'';
-      var greet = this.guest ? (d.greeting + ' <b>' + esc(this.guest.name) + '</b>') : '';
-      $('inv-greet').innerHTML = greet;
       $('cartouche').setAttribute('dir', d.dir);
       $('cartouche').innerHTML =
         '<div class="ic-bismillah" dir="rtl" lang="ar">بِسْمِ اللّٰہِ الرَّحْمٰنِ الرَّحِیْمِ</div>' +
