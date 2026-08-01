@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Walima — You are cordially invited</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,16 +52,17 @@
   .ic-date{font-size:2.3cqw;color:#3A2A16}
   .ic-venue{font-family:'Cormorant Garamond',serif;font-size:3.1cqw;color:#2e2010;margin-top:.5cqw;line-height:1.1}
   .ic-loc{font-size:2.18cqw;color:#6a4f2c}
-  .inv-ur .inv-cartouche{direction:rtl;gap:.3cqw;left:27.5%;right:27.5%;top:20%;bottom:27%}
-  .inv-ur .ic-bismillah{font-size:2.4cqw;line-height:1.5;margin-bottom:.15cqw;padding-top:0}
+  .inv-ur .inv-cartouche{direction:rtl;gap:.45cqw;left:26.8%;right:26.8%;top:19%;bottom:25.5%}
+  .inv-ur .ic-bismillah{font-size:3.0cqw;line-height:1.5;margin-bottom:.15cqw;padding-top:0}
   .inv-ur .ic-hosts{font-family:'Noto Nastaliq Urdu',serif;font-variant:normal;letter-spacing:0;font-size:1.9cqw;line-height:1.7}
-  .inv-ur .ic-invite{font-family:'Noto Nastaliq Urdu',serif;font-style:normal;font-size:1.85cqw;line-height:1.85;margin:.2cqw 0}
-  .inv-ur .ic-name{font-family:'Noto Nastaliq Urdu',serif;font-size:3.4cqw;line-height:1.55;font-weight:400}
-  .inv-ur .ic-with{font-family:'Noto Nastaliq Urdu',serif;font-style:normal;font-size:2.4cqw;line-height:1.5}
-  .inv-ur .ic-parent{font-family:'Noto Nastaliq Urdu',serif;font-size:1.82cqw;line-height:1.7;margin-top:.15cqw}
+  .inv-ur .ic-invite{font-family:'Noto Nastaliq Urdu',serif;font-style:normal;font-size:2.7cqw;line-height:1.85;margin:.2cqw 0}
+  .inv-ur .ic-name{font-family:'Noto Nastaliq Urdu',serif;font-size:5.0cqw;line-height:1.55;font-weight:400}
+  .inv-ur .ic-with{font-family:'Noto Nastaliq Urdu',serif;font-style:normal;font-size:3.2cqw;line-height:1.5}
+  .inv-ur .ic-parent{font-family:'Noto Nastaliq Urdu',serif;font-size:2.5cqw;line-height:1.7;margin-top:.15cqw}
   .inv-ur .ic-date,.inv-ur .ic-loc{font-family:'Noto Nastaliq Urdu',serif;line-height:1.65}
-  .inv-ur .ic-date{font-size:2.05cqw}
-  .inv-ur .ic-venue{font-family:'Noto Nastaliq Urdu',serif;font-size:2.7cqw;line-height:1.4}
+  .inv-ur .ic-loc{font-size:2.6cqw}
+  .inv-ur .ic-date{font-size:2.8cqw}
+  .inv-ur .ic-venue{font-family:'Noto Nastaliq Urdu',serif;font-size:3.8cqw;margin-top:.7cqw;line-height:1.4}
   /* footer now matches the rose-and-gold card rather than the old emerald */
   .inv-footer{position:relative;width:min(94%,520px);margin:clamp(30px,4.4vw,44px) auto 6px;padding:clamp(26px,3.4vw,34px) clamp(20px,3vw,34px) clamp(18px,2.6vw,26px);border-radius:9px;background:linear-gradient(#c0335f,#8e1c3e);border:1px solid rgba(247,214,140,.5);color:#fdeede;text-align:center;box-shadow:0 20px 50px -24px rgba(0,0,0,.8), inset 0 0 0 1px rgba(247,214,140,.18)}
   .inv-ur .inv-footer{direction:rtl}
@@ -270,7 +271,7 @@
 
 <script src="./content.js?v=2"></script>
 <script src="./audio.js?v=2"></script>
-<script src="./letter3d.js?v=24"></script>
+<script src="./letter3d.js?v=25"></script>
 <script>
 (function(){
   "use strict";
@@ -463,6 +464,8 @@
       }).join('');
     },
     fitInvitation:function(){
+      // while the guest is pinch-zoomed, leave their view alone
+      if(window.visualViewport && visualViewport.scale > 1.01) return;
       var wrap=document.querySelector('.inv-wrap'); if(!wrap || $('inv-stage').classList.contains('hidden')) return;
       wrap.style.transform='none';
       var stage=$('inv-stage'), pad=parseFloat(getComputedStyle(stage).paddingTop)||0;

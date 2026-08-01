@@ -478,7 +478,7 @@
     // Text is laid inside an inset of that so it never meets the arch or the gold.
     function drawCardText(x, W, H, d, lang){
       var ur = (lang==="ur");
-      var L=W*(ur?0.275:0.29), R=W*(1-(ur?0.275:0.29)), T=H*(ur?0.20:0.21), B=H*(ur?0.73:0.72);
+      var L=W*(ur?0.268:0.29), R=W*(1-(ur?0.268:0.29)), T=H*(ur?0.19:0.21), B=H*(ur?0.745:0.72);
       var cx=(L+R)/2, colW=R-L;
       var serif = ur ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif";
       var body  = ur ? "'Noto Nastaliq Urdu', serif" : "'EB Garamond', Georgia, serif";
@@ -500,24 +500,24 @@
         return y;
       }
 
-      var y=T+ (ur?34:30)*u;
+      var y=T+ (ur?40:30)*u;
       // bismillah
       y=lines("بِسْمِ اللّٰہِ الرَّحْمٰنِ الرَّحِیْمِ",
-        (22*u)+"px 'Noto Nastaliq Urdu','Amiri',serif", "#a97f2c", 22*u, 1.7, y, colW);
+        ((ur?28:22)*u)+"px 'Noto Nastaliq Urdu','Amiri',serif", "#a97f2c", (ur?28:22)*u, 1.7, y, colW);
       y+=10*u;
-      y=lines(d.invite, "italic "+((ur?17:19)*u)+"px "+body, "#5f4630", (ur?17:19)*u, ur?1.9:1.42, y, colW);
+      y=lines(d.invite, (ur?"":"italic ")+((ur?25:19)*u)+"px "+body, "#5f4630", (ur?25:19)*u, ur?1.85:1.42, y, colW);
       y+=16*u;
       x.font=(20*u)+"px Georgia,serif"; x.fillStyle="#b8892f";
       x.fillText("❦ ❧ ❦", cx, y); y+=30*u;
-      y=lines(d.groom, "600 "+((ur?34:40)*u)+"px "+serif, "#7C2A38", (ur?34:40)*u, 1.1, y, colW);
+      y=lines(d.groom, (ur?"":"600 ")+((ur?47:40)*u)+"px "+serif, "#7C2A38", (ur?47:40)*u, ur?1.5:1.1, y, colW);
       y+=4*u;
-      y=lines(d.groomParent, "italic "+((ur?16:17)*u)+"px "+body, "#6a4f2c", (ur?16:17)*u, ur?1.7:1.3, y, colW);
+      y=lines(d.groomParent, (ur?"":"italic ")+((ur?23:17)*u)+"px "+body, "#6a4f2c", (ur?23:17)*u, ur?1.7:1.3, y, colW);
       y+=10*u;
-      y=lines(d.withWord, "italic 600 "+((ur?22:24)*u)+"px "+serif, "#9c7526", (ur?22:24)*u, 1.2, y, colW);
+      y=lines(d.withWord, (ur?"":"italic 600 ")+((ur?30:24)*u)+"px "+serif, "#9c7526", (ur?30:24)*u, ur?1.5:1.2, y, colW);
       y+=6*u;
-      y=lines(d.bride, "600 "+((ur?34:40)*u)+"px "+serif, "#7C2A38", (ur?34:40)*u, 1.1, y, colW);
+      y=lines(d.bride, (ur?"":"600 ")+((ur?47:40)*u)+"px "+serif, "#7C2A38", (ur?47:40)*u, ur?1.5:1.1, y, colW);
       y+=4*u;
-      y=lines(d.brideParent, "italic "+((ur?16:17)*u)+"px "+body, "#6a4f2c", (ur?16:17)*u, ur?1.7:1.3, y, colW);
+      y=lines(d.brideParent, (ur?"":"italic ")+((ur?23:17)*u)+"px "+body, "#6a4f2c", (ur?23:17)*u, ur?1.7:1.3, y, colW);
       y+=22*u;
       // rule with a small ornament
       x.strokeStyle="#c8a24e"; x.lineWidth=Math.max(1,1*u);
@@ -526,11 +526,11 @@
       x.fillText(" ❦ ", cx, y+6*u);
       x.fillStyle="#b8892f"; x.fillText("❦", cx, y+6*u);
       y+=34*u;
-      y=lines(d.date, ((ur?18:20)*u)+"px "+body, "#3A2A16", (ur?18:20)*u, 1.4, y, colW);
+      y=lines(d.date, ((ur?26:20)*u)+"px "+body, "#3A2A16", (ur?26:20)*u, ur?1.6:1.4, y, colW);
       y+=10*u;
-      y=lines(d.venue, ((ur?24:27)*u)+"px "+serif, "#2e2010", (ur?24:27)*u, 1.15, y, colW);
+      y=lines(d.venue, ((ur?35:27)*u)+"px "+serif, "#2e2010", (ur?35:27)*u, ur?1.45:1.15, y, colW);
       y+=4*u;
-      lines(d.venueLoc, ((ur?17:19)*u)+"px "+body, "#6a4f2c", (ur?17:19)*u, 1.35, y, colW);
+      lines(d.venueLoc, ((ur?24:19)*u)+"px "+body, "#6a4f2c", (ur?24:19)*u, ur?1.6:1.35, y, colW);
     }
     function bakeBoth(){
       bakeCard("en", function(t){ if(t){ self0._cardTexEn=t; applyCardTex(); } });
