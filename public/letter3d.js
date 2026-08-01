@@ -939,7 +939,67 @@
     floorSpill.rotation.x=-Math.PI/2; floorSpill.position.set(0,-1.02,5.2); fw.add(floorSpill);
     // SINGLE unsplit plaque plate — one mesh parented to the FRAME (fw), spanning both closed leaves.
     // No slicing, no seam to align. Fades out the instant the doors begin to move (see _setDoors).
-    var plaqueTex=_dtex("./assets/plaque.png?v=16");
+    /* The sign used to be a flat PNG, so the only glow came from the halo mesh behind
+       the whole plate — the lettering itself was inert. Drawing it here lets each word
+       carry its own bloom (canvas shadowBlur, laid down in several passes), which is
+       what makes it read when it is the only lit thing in a black hallway. */
+    var plaqueTex=(function(){
+      var PW=1400, PH=707;
+      var pc=document.createElement("canvas"); pc.width=PW; pc.height=PH;
+      var tex=new THREE.CanvasTexture(pc); tex.anisotropy=8;
+      if(THREE.sRGBEncoding) tex.encoding=THREE.sRGBEncoding;
+      function draw(){
+        var g=pc.getContext("2d");
+        g.clearRect(0,0,PW,PH);
+        // plate
+        var r=26, m=10, w=PW-m*2, h=PH-m*2;
+        g.beginPath();
+        g.moveTo(m+r,m); g.arcTo(m+w,m,m+w,m+h,r); g.arcTo(m+w,m+h,m,m+h,r);
+        g.arcTo(m,m+h,m,m,r); g.arcTo(m,m,m+w,m,r); g.closePath();
+        var pg=g.createLinearGradient(0,m,0,m+h);
+        pg.addColorStop(0,"#12100b"); pg.addColorStop(0.5,"#0a0906"); pg.addColorStop(1,"#070604");
+        g.fillStyle=pg; g.fill();
+        // double gold frame
+        g.strokeStyle="rgba(212,170,96,0.92)"; g.lineWidth=7; g.stroke();
+        g.beginPath();
+        var m2=m+16, r2=r-6, w2=PW-m2*2, h2=PH-m2*2;
+        g.moveTo(m2+r2,m2); g.arcTo(m2+w2,m2,m2+w2,m2+h2,r2); g.arcTo(m2+w2,m2+h2,m2,m2+h2,r2);
+        g.arcTo(m2,m2+h2,m2,m2,r2); g.arcTo(m2,m2,m2+w2,m2,r2); g.closePath();
+        g.strokeStyle="rgba(198,155,84,0.55)"; g.lineWidth=2.5; g.stroke();
+
+        g.textAlign="center"; g.textBaseline="middle";
+        // glowing text: successive shadowBlur passes build a real halo per word
+        function glow(text, font, y, spacing, fill, blur, passes){
+          g.font=font;
+          if(g.letterSpacing!==undefined) g.letterSpacing=spacing+"px";
+          g.shadowColor="rgba(255,196,92,0.85)";
+          for(var i=passes;i>0;i--){
+            g.shadowBlur=blur*i/passes;
+            g.fillStyle=fill; g.fillText(text, PW/2, y);
+          }
+          g.shadowBlur=0; g.shadowColor="transparent";
+          if(g.letterSpacing!==undefined) g.letterSpacing="0px";
+        }
+        var titleGrad=g.createLinearGradient(0,150,0,265);
+        titleGrad.addColorStop(0,"#ffe6ae"); titleGrad.addColorStop(0.5,"#e8c078"); titleGrad.addColorStop(1,"#b8892f");
+        glow("VALIMA", "600 148px 'Cormorant Garamond', Georgia, serif", 210, 26, titleGrad, 46, 4);
+        // date, with a rule either side — measure first so the rules sit clear of it
+        g.font="500 46px 'EB Garamond', Georgia, serif";
+        if(g.letterSpacing!==undefined) g.letterSpacing="16px";
+        var dw=g.measureText("7 JANUARY 2027").width;
+        if(g.letterSpacing!==undefined) g.letterSpacing="0px";
+        glow("7 JANUARY 2027", "500 46px 'EB Garamond', Georgia, serif", 348, 16, "#dcb878", 22, 3);
+        g.strokeStyle="rgba(206,164,92,0.75)"; g.lineWidth=2;
+        var gap=34, half=dw/2;
+        g.beginPath(); g.moveTo(PW/2-half-gap-90,348); g.lineTo(PW/2-half-gap,348); g.stroke();
+        g.beginPath(); g.moveTo(PW/2+half+gap,348); g.lineTo(PW/2+half+gap+90,348); g.stroke();
+        glow("You are cordially invited", "italic 600 56px 'Cormorant Garamond', Georgia, serif", 460, 0, "#e0b46a", 26, 3);
+        tex.needsUpdate=true;
+      }
+      draw();
+      if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw).catch(function(){});
+      return tex;
+    })();
     // self-lit sign: emissive carries the artwork so it stays bright regardless of hall lighting; the
     // ONLY thing animated on door-open is material.opacity (transparent) → it goes INVISIBLE, never black.
     var plaqueMat=new THREE.MeshStandardMaterial({map:plaqueTex, color:0x0b0a06, transparent:true, roughness:0.5, metalness:0.0, emissive:0xffffff, emissiveMap:plaqueTex, emissiveIntensity:0.95, envMapIntensity:0.2, depthWrite:false});

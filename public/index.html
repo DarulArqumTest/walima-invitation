@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Walima — You are cordially invited</title>
+<title>Valima — You are cordially invited</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital@0;1&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
@@ -87,6 +87,10 @@
   .if-leader{flex:1;border-bottom:1px dotted rgba(232,200,126,.4);transform:translateY(-4px)}
   .if-time{white-space:nowrap;font-variant-numeric:tabular-nums;color:#e6c98a}
   .inv-ur .if-title,.inv-ur .if-row,.inv-ur .if-time{font-family:'Noto Nastaliq Urdu',serif}
+  .inv-ur .if-leader{border-bottom:0}
+  .inv-ur .if-prog{gap:10px;width:min(94%,340px)}
+  .inv-ur .if-row{font-size:clamp(14px,1.6vw,17px);line-height:2.1;gap:16px}
+  .inv-ur .if-time{font-variant-numeric:normal;letter-spacing:.01em}
   .inv-ur .inv-footer{padding:clamp(13px,2vw,18px) clamp(18px,2.6vw,30px)}
   .inv-ur .if-title{font-size:clamp(10px,1.05vw,12px)}
   .inv-ur .if-prog{margin-top:9px;gap:2px}
@@ -143,6 +147,7 @@
     box-shadow:0 0 0 1px rgba(232,200,126,.30), inset 0 1px 0 rgba(255,236,190,.10), 0 22px 50px -24px rgba(0,0,0,.9);
     transition:box-shadow .3s ease, transform .18s ease, background .3s ease}
   .lang-btn small{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:rgba(232,200,126,.58);font-family:'EB Garamond',serif}
+  .lang-btn small.ur-sub{font-family:'Noto Nastaliq Urdu',serif;font-size:13px;letter-spacing:0;text-transform:none;line-height:1.9}
   .lang-btn:hover{transform:translateY(-2px);background:linear-gradient(163deg,rgba(38,28,14,.96),rgba(14,9,5,.97));box-shadow:0 0 0 1px rgba(232,200,126,.62), inset 0 1px 0 rgba(255,236,190,.16), 0 26px 56px -24px rgba(0,0,0,.92)}
   .lang-btn.ur{font-family:'Noto Nastaliq Urdu',serif;font-size:clamp(23px,3.4vw,30px);line-height:1.9}
   .tap-hint{color:#f0e4c8;font-size:clamp(18px,3vw,28px);font-weight:600;letter-spacing:.28em;text-transform:uppercase;animation:softpulse 2s ease-in-out infinite;cursor:pointer;padding:24px 40px;text-shadow:0 4px 16px rgba(0,0,0,.6);background:rgba(10,7,4,.5);border-radius:12px;backdrop-filter:blur(4px);border:1px solid rgba(232,200,126,.25)}
@@ -165,6 +170,16 @@
   .pill.yes{background:rgba(13,91,66,.5);border:1px solid #2f9e6f;color:#a9e8cc}
   .pill.no{background:rgba(91,30,30,.5);border:1px solid #b56;color:#e8b0b0}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:20;background:#0d3a2b;border:1px solid rgba(232,200,126,.4);color:#f0e4c8;padding:12px 22px;border-radius:8px;box-shadow:0 20px 50px -20px rgba(0,0,0,.8);font-size:14px}
+  /* deliberately quiet: bottom-left, low contrast, fades up only for repeat guests */
+  .skip{position:fixed;left:16px;bottom:16px;z-index:21;display:flex;align-items:center;gap:9px;
+    opacity:0;transition:opacity .6s ease;pointer-events:none}
+  .skip.on{opacity:.42}
+  .skip.held{opacity:.92}
+  .skip-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#e8c87e;font-family:'EB Garamond',serif}
+  .skip-ring{width:26px;height:26px;transform:rotate(-90deg)}
+  .skip-ring circle{fill:none;stroke-width:2.5}
+  .skip-ring circle:first-child{stroke:rgba(232,200,126,.22)}
+  #skip-arc{stroke:#e8c87e;stroke-linecap:round;stroke-dasharray:100.5;stroke-dashoffset:100.5;transition:stroke-dashoffset .08s linear}
   .mute{position:fixed;right:14px;bottom:14px;z-index:22;width:42px;height:42px;border-radius:50%;cursor:pointer;
     border:1px solid rgba(232,200,126,.34);background:rgba(10,7,4,.62);color:#e8c87e;font-size:17px;line-height:1;
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:color .2s,border-color .2s,opacity .3s}
@@ -235,11 +250,11 @@
   <div id="lang" class="screen hidden">
     <div class="lang-panel">
       <div class="lang-orn">&#10086;&#160;&#10087;&#160;&#10086;</div>
-      <div class="lang-title">Would you like your invitation<br>in English or Urdu?</div>
-      <div class="lang-title-ur" lang="ur">کیا آپ اپنا دعوت نامہ انگریزی میں دیکھنا چاہیں گے یا اردو میں؟</div>
+      <div class="lang-title">Please select the language<br>of your invitation card</div>
+      <div class="lang-title-ur" lang="ur">براہِ کرم اپنے دعوت نامے کی زبان کا انتخاب کیجئے</div>
       <div class="lang-row">
-        <button class="lang-btn" onclick="App.chooseLang('en')">English<small>English</small></button>
-        <button class="lang-btn ur" onclick="App.chooseLang('ur')" lang="ur">اردو<small>Urdu</small></button>
+        <button class="lang-btn" onclick="App.chooseLang('en')">English<small lang="ur" class="ur-sub">انگریزی</small></button>
+        <button class="lang-btn ur" onclick="App.chooseLang('ur')" lang="ur">اردو<small>URDU</small></button>
       </div>
     </div>
   </div>
@@ -262,6 +277,12 @@
     </div>
   </div>
 
+  <!-- returning guests can hold anywhere to skip ahead -->
+  <div id="skip" class="skip hidden" aria-hidden="true">
+    <svg class="skip-ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16"></circle><circle id="skip-arc" cx="18" cy="18" r="16"></circle></svg>
+    <span class="skip-label">Hold to skip</span>
+  </div>
+
   <button id="mute" class="mute hidden" onclick="App.toggleMute()" aria-label="Mute music" title="Mute music">
     <span id="mute-ico">&#9835;</span>
   </button>
@@ -269,9 +290,9 @@
   <div id="toast" class="toast hidden"></div>
 </div>
 
-<script src="./content.js?v=2"></script>
+<script src="./content.js?v=3"></script>
 <script src="./audio.js?v=2"></script>
-<script src="./letter3d.js?v=25"></script>
+<script src="./letter3d.js?v=26"></script>
 <script>
 (function(){
   "use strict";
@@ -352,9 +373,11 @@
           self.rsvp  = j.rsvp || null;
           self.lang = (j.guest.language==='ur') ? 'ur' : 'en';
           hide('gate-err');
-          // Already sealed? Don't make them sit through the whole reveal again —
-          // go straight to their response, then surface any note from the hosts.
-          if(self.rsvp && self.rsvp.locked) self._returning();
+          // Everyone watches the reveal, every time — guests asked to see it again.
+          // A returning guest just gets the option to hold and skip.
+          self.seenBefore = !!(self.rsvp && self.rsvp.locked);
+          // A note from the hosts comes FIRST and holds everything until dismissed.
+          if(self.rsvp && self.rsvp.host_note) self._hostNoteThenEnter();
           else self._enter();
         } else {
           self._reject((j && j.message) || "We couldn't find that number. Please check with the hosts.");
@@ -376,19 +399,67 @@
         // beginRead() and playIntro() share one clock — the reveal beats and the music
         // are locked together from this instant.
         if(self.book){ self.book.beginRead(); self.book.playIntro(self.reduced); }
+        if(self.seenBefore) self._armSkip();
       }, 420);
     },
-    // returning guest who has already sealed: skip the reveal entirely
-    _returning:function(){
+
+    // ---------- hold-to-skip (repeat guests only) ----------
+    _armSkip:function(){
+      var self=this, el=$('skip'), arc=$('skip-arc'), HOLD=900, t0=0, raf=0, done=false;
+      show('skip'); requestAnimationFrame(function(){ el.classList.add('on'); });
+
+      function frame(){
+        var p=Math.min(1,(performance.now()-t0)/HOLD);
+        arc.style.strokeDashoffset=String(100.5*(1-p));
+        if(p>=1){ finish(); return; }
+        raf=requestAnimationFrame(frame);
+      }
+      function start(e){
+        if(done||t0) return;
+        if(e && e.target && e.target.closest && e.target.closest('#mute')) return;
+        t0=performance.now(); el.classList.add('held'); raf=requestAnimationFrame(frame);
+      }
+      function cancel(){
+        if(done) return;
+        t0=0; cancelAnimationFrame(raf); el.classList.remove('held');
+        arc.style.strokeDashoffset='100.5';
+      }
+      function finish(){
+        done=true; cancelAnimationFrame(raf); self._disarmSkip();
+        if(window.WalimaAudio) window.WalimaAudio.sfx('tap');
+        self.skipToCard();
+      }
+      this._skipOff=function(){
+        ['mousedown','touchstart'].forEach(function(k){ removeEventListener(k,start); });
+        ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(k){ removeEventListener(k,cancel); });
+        cancelAnimationFrame(raf); el.classList.remove('on','held'); hide('skip');
+      };
+      addEventListener('mousedown',start,{passive:true}); addEventListener('touchstart',start,{passive:true});
+      ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(k){ addEventListener(k,cancel,{passive:true}); });
+    },
+    _disarmSkip:function(){ if(this._skipOff){ this._skipOff(); this._skipOff=null; } },
+
+    // jump straight to the settled invitation
+    skipToCard:function(){
+      if(this._stage==='card') return;
+      this._stage='card';
+      hide('lang');
+      if(this.book && this.book.skipToSettled) this.book.skipToSettled();
+      $('wb-gl').style.transition='opacity .5s ease'; $('wb-gl').style.opacity='0';
+      if(window.WalimaAudio) window.WalimaAudio.setMuffle(0, 0.6);
+      this.showInvitation();
+    },
+    // A note from the hosts is shown BEFORE anything moves, and nothing starts —
+    // no scene, no music — until the guest closes it.
+    _hostNoteThenEnter:function(){
       var self=this;
-      this._stage='returning';
+      this._stage='hostnote';
       $('gate').style.transition='opacity .4s ease'; $('gate').style.opacity='0';
       setTimeout(function(){
         hide('gate');
-        if(self.book && self.book.skipToSettled) self.book.skipToSettled();
-        $('wb-gl').style.opacity='0';
-        self.showInvitation();
-        setTimeout(function(){ self._hostNote(); }, 1200);
+        $('note-body').textContent = self.rsvp.host_note;
+        show('hostnote');
+        if(window.WalimaAudio) window.WalimaAudio.sfx('settle');
       }, 420);
     },
 
@@ -407,24 +478,21 @@
     },
 
     // ---------- a note left by the hosts ----------
-    _hostNote:function(){
-      var n = this.rsvp && this.rsvp.host_note;
-      if(!n || this._noteSeen) return;
-      $('note-body').textContent = n;
-      show('hostnote');
-      if(window.WalimaAudio) window.WalimaAudio.sfx('settle');
-    },
     closeHostNote:function(){
       var self=this;
       this._noteSeen = true; hide('hostnote');
       if(window.WalimaAudio) window.WalimaAudio.sfx('tap');
       // tell the server we've shown it so it isn't surfaced again
       api('/api/rsvp', { method:'PATCH' }).catch(function(){});
+      // now, and only now, the reveal begins
+      if(this._stage==='hostnote') this._enter();
     },
 
     // ---------- settled invitation ----------
     showInvitation:function(){
       var self=this;
+      this._stage='card';
+      this._disarmSkip();
       this.renderInvitation();
       show('inv-stage');
       requestAnimationFrame(function(){ $('inv-stage').style.opacity='1'; self.fitInvitation(); });

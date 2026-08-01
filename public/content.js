@@ -46,20 +46,20 @@
       dir: "ltr",
       mapWord: "Map",
       mapLabel: "View Orient Banquet on Google Maps",
-      invite: "We cordially invite the pleasure of your company to grace the auspicious occasion of the Walima of",
+      invite: "We cordially invite the pleasure of your company to grace the auspicious occasion of the Valima of",
       groom: "Muhammad Ashhad",
       groomParent: "the beloved son of Mr Ahmed Shemail and Mrs Munazzah Asif",
       withWord: "With",
       bride: "Bismah Kashif",
       brideParent: "the beloved daughter of Mr Kashif Ali and Mrs Aisha Kashif",
-      date: "Saturday, 7th January 2027",
+      date: "Thursday, 7th January 2027",
       venue: "Orient Banquet",
       venueLoc: "Gulistan-e-Jauhar, Karachi",
       programmeTitle: "Programme",
       programme: [
-        { label: "Arrival of guests", time: "7:00 pm" },
+        { label: "Arrival of Guests", time: "7:00 pm" },
         { label: "Reception",         time: "8:00 pm" },
-        { label: "Farewell ceremony", time: "9:00 pm" }
+        { label: "Farewell Ceremony", time: "9:00 pm" }
       ],
       greeting: "Dear",
       rsvpCta: "RSVP",
@@ -75,14 +75,14 @@
       withWord: "بہمراہ",
       bride: "بسمہ کاشف",
       brideParent: "دختر کاشف علی و عائشہ کاشف",
-      date: "بروز ہفتہ، ۷ جنوری ۲۰۲۷",
+      date: "بروز جمعرات، ۷ جنوری ۲۰۲۷",
       venue: "اورینٹ بینکوئٹ",
       venueLoc: "گلستانِ جوہر، کراچی",
       programmeTitle: "تقریب",
       programme: [
-        { label: "مہمانوں کی آمد", time: "۷:۰۰ شام" },
-        { label: "استقبالیہ",     time: "۸:۰۰ شام" },
-        { label: "رخصتی",         time: "۹:۰۰ شام" }
+        { label: "مہمانوں کی آمد", time: "٧ بجے شام" },
+        { label: "استقبالیہ",     time: "٨ بجے شام" },
+        { label: "رخصتی",         time: "٩ بجے شب" }
       ],
       greeting: "محترم",
       rsvpCta: "جواب دیں",
