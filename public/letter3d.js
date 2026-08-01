@@ -451,10 +451,96 @@
       cardMat.needsUpdate=true;
     }
     this._applyCardTex=applyCardTex;
-    loadTex("./assets/card-full-en.jpg", function(t){ t.anisotropy=16; self0._cardTexEn=t; applyCardTex(); });
-    loadTex("./assets/card-full-ur.jpg", function(t){ t.anisotropy=16; self0._cardTexUr=t; applyCardTex(); });
-    var edge=new THREE.MeshStandardMaterial({ color:0x083128, roughness:0.8 });
-    var CW=1.06, CH=1.30;
+    /* The card that slides out of the envelope is the SAME rose artwork as the
+       full-screen invitation, with the wording drawn onto it here at runtime.
+       Baking it in the browser (rather than shipping a second pair of flattened
+       JPEGs) means the 3D card and the DOM card can never drift apart, and both
+       languages come from one source of truth in content.js. */
+    var CARD_ART="./assets/card-pink.jpg";
+    function bakeCard(lang, cb){
+      var img=new Image();
+      img.onload=function(){
+        var W=img.naturalWidth||1023, H=img.naturalHeight||1557;
+        var c=document.createElement("canvas"); c.width=W; c.height=H;
+        var x=c.getContext("2d");
+        x.drawImage(img,0,0,W,H);
+        var d=(self0.content && self0.content[lang]) || null;
+        if(d) drawCardText(x, W, H, d, lang);
+        var t=new THREE.CanvasTexture(c);
+        t.anisotropy=16; t.needsUpdate=true;
+        if(THREE.sRGBEncoding) t.encoding=THREE.sRGBEncoding;
+        cb(t);
+      };
+      img.onerror=function(){ cb(null); };
+      img.src=CARD_ART;
+    }
+    // Panel measured off the artwork: 16.1%-74.6% vertical, 26.3%-73.1% horizontal.
+    // Text is laid inside an inset of that so it never meets the arch or the gold.
+    function drawCardText(x, W, H, d, lang){
+      var ur = (lang==="ur");
+      var L=W*(ur?0.275:0.29), R=W*(1-(ur?0.275:0.29)), T=H*(ur?0.20:0.21), B=H*(ur?0.73:0.72);
+      var cx=(L+R)/2, colW=R-L;
+      var serif = ur ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif";
+      var body  = ur ? "'Noto Nastaliq Urdu', serif" : "'EB Garamond', Georgia, serif";
+      var u=W/1023;   // scale factor relative to the reference artwork
+      x.textAlign="center"; x.textBaseline="alphabetic";
+      x.direction = ur ? "rtl" : "ltr";
+
+      // wrap helper — returns the y after drawing
+      function lines(text, font, fill, size, lh, y, maxW){
+        x.font=font; x.fillStyle=fill;
+        var words=String(text||"").split(/\s+/), out=[], cur="";
+        for(var i=0;i<words.length;i++){
+          var trial=cur?cur+" "+words[i]:words[i];
+          if(x.measureText(trial).width>maxW && cur){ out.push(cur); cur=words[i]; }
+          else cur=trial;
+        }
+        if(cur) out.push(cur);
+        for(var j=0;j<out.length;j++){ x.fillText(out[j], cx, y); y+=size*lh; }
+        return y;
+      }
+
+      var y=T+ (ur?34:30)*u;
+      // bismillah
+      y=lines("بِسْمِ اللّٰہِ الرَّحْمٰنِ الرَّحِیْمِ",
+        (22*u)+"px 'Noto Nastaliq Urdu','Amiri',serif", "#a97f2c", 22*u, 1.7, y, colW);
+      y+=10*u;
+      y=lines(d.invite, "italic "+((ur?17:19)*u)+"px "+body, "#5f4630", (ur?17:19)*u, ur?1.9:1.42, y, colW);
+      y+=16*u;
+      x.font=(20*u)+"px Georgia,serif"; x.fillStyle="#b8892f";
+      x.fillText("❦ ❧ ❦", cx, y); y+=30*u;
+      y=lines(d.groom, "600 "+((ur?34:40)*u)+"px "+serif, "#7C2A38", (ur?34:40)*u, 1.1, y, colW);
+      y+=4*u;
+      y=lines(d.groomParent, "italic "+((ur?16:17)*u)+"px "+body, "#6a4f2c", (ur?16:17)*u, ur?1.7:1.3, y, colW);
+      y+=10*u;
+      y=lines(d.withWord, "italic 600 "+((ur?22:24)*u)+"px "+serif, "#9c7526", (ur?22:24)*u, 1.2, y, colW);
+      y+=6*u;
+      y=lines(d.bride, "600 "+((ur?34:40)*u)+"px "+serif, "#7C2A38", (ur?34:40)*u, 1.1, y, colW);
+      y+=4*u;
+      y=lines(d.brideParent, "italic "+((ur?16:17)*u)+"px "+body, "#6a4f2c", (ur?16:17)*u, ur?1.7:1.3, y, colW);
+      y+=22*u;
+      // rule with a small ornament
+      x.strokeStyle="#c8a24e"; x.lineWidth=Math.max(1,1*u);
+      x.beginPath(); x.moveTo(cx-colW*0.22,y); x.lineTo(cx+colW*0.22,y); x.stroke();
+      x.font=(17*u)+"px Georgia,serif"; x.fillStyle="#fdf3dc";
+      x.fillText(" ❦ ", cx, y+6*u);
+      x.fillStyle="#b8892f"; x.fillText("❦", cx, y+6*u);
+      y+=34*u;
+      y=lines(d.date, ((ur?18:20)*u)+"px "+body, "#3A2A16", (ur?18:20)*u, 1.4, y, colW);
+      y+=10*u;
+      y=lines(d.venue, ((ur?24:27)*u)+"px "+serif, "#2e2010", (ur?24:27)*u, 1.15, y, colW);
+      y+=4*u;
+      lines(d.venueLoc, ((ur?17:19)*u)+"px "+body, "#6a4f2c", (ur?17:19)*u, 1.35, y, colW);
+    }
+    function bakeBoth(){
+      bakeCard("en", function(t){ if(t){ self0._cardTexEn=t; applyCardTex(); } });
+      bakeCard("ur", function(t){ if(t){ self0._cardTexUr=t; applyCardTex(); } });
+    }
+    // wait for the webfonts, otherwise the canvas bakes in a fallback face
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(bakeBoth).catch(bakeBoth);
+    else bakeBoth();
+    var edge=new THREE.MeshStandardMaterial({ color:0x8e1c3e, roughness:0.8 });
+    var CH=1.30, CW=CH*(1023/1557);   // match the rose artwork's proportions
     var card=this.card=new THREE.Mesh(new THREE.BoxGeometry(CW,CH,0.02),[edge,edge,edge,edge,cardMat,edge]);
     card.castShadow=true; card.receiveShadow=true;
     this._cardHomeY = 0.0;                          // hidden fully BEHIND the decorated front paper
