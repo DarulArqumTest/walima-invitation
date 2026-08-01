@@ -385,6 +385,13 @@
     if(!this._roomLights || this._roomLightF===f) return;
     this._roomLightF=f;
     for(var i=0;i<this._roomLights.length;i++){ var R=this._roomLights[i]; R.l.intensity=R.b*f; }
+    // The image-based environment lights every PBR material on its own, independently of
+    // any Light in the scene — leaving it on kept the hall softly visible with all the
+    // lamps at zero. Detach it while we want true black, reattach as the candles come up.
+    if(this.scene && this.envRT){
+      var want = f>0.004 ? this.envRT.texture : null;
+      if(this.scene.environment !== want) this.scene.environment = want;
+    }
   };
 
   WeddingBook.prototype._green=function(shade){
@@ -1025,9 +1032,10 @@
     var gap=Math.max(cp, 0);
     var doneFade=1-clamp(cp/0.15,0,1);                     // beam dies on first door motion, gone by 15% open
     var base=seep*0.5*doneFade;
-    if(this.blade){ this.blade.scale.x=(0.1+seep*0.05); this.blade.material.opacity=Math.min((0.28+base*0.8),0.95)*doneFade; }
-    if(this.bladeGlow){ this.bladeGlow.scale.x=0.3+seep*0.35; this.bladeGlow.material.opacity=Math.min(base*0.6,0.6)*doneFade; }
-    if(this.floorSpill){ this.floorSpill.scale.set(0.4+gap*1.2, 0.5+gap*0.8, 1); this.floorSpill.material.opacity=Math.min(seep*0.5,0.5)*doneFade; }
+    // every one of these is scaled by seep so nothing leaks light before the first candle
+    if(this.blade){ this.blade.scale.x=(0.1+seep*0.05); this.blade.material.opacity=Math.min((0.28+base*0.8),0.95)*doneFade*seep; }
+    if(this.bladeGlow){ this.bladeGlow.scale.x=0.3+seep*0.35; this.bladeGlow.material.opacity=Math.min(base*0.6,0.6)*doneFade*seep; }
+    if(this.floorSpill){ this.floorSpill.scale.set(0.4+gap*1.2, 0.5+gap*0.8, 1); this.floorSpill.material.opacity=Math.min(seep*0.5,0.5)*doneFade*seep; }
     if(this.plaque){
       // Slow, graceful fade: the sign holds fully readable through the first part of the swing, then
       // dissolves gradually as the doors open (gone by ~68% open). It's parented to the frame (doesn't
