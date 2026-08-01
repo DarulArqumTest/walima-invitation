@@ -46,6 +46,23 @@
   .ic-fl{font-family:Georgia,serif;letter-spacing:.12em;font-size:2.6cqw;background:linear-gradient(#e6cb85,#a97f2c);-webkit-background-clip:text;background-clip:text;color:transparent}
   .ic-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:4.3cqw;line-height:1.04;color:#7C2A38;letter-spacing:-.01em;white-space:nowrap}
   .ic-with{font-family:'Tangerine','Cormorant Garamond',serif;font-style:normal;font-weight:700;font-size:5.6cqw;line-height:.95;background:linear-gradient(#c49a3d,#9c7526);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* 'With' / بہمراہ is the word that joins the two names, so it is set as an
+     ornament rather than a label: gold lettering, tapered rules reaching out to
+     either side, and a small lozenge where each rule meets the word. */
+  .ic-with{display:flex;align-items:center;justify-content:center;gap:1.6cqw;width:100%}
+  .ic-with:before,.ic-with:after{content:'';flex:1 1 auto;max-width:22%;height:1px;
+    background:linear-gradient(90deg,rgba(200,162,78,0) 0%,rgba(200,162,78,.55) 55%,rgba(200,162,78,.95) 100%)}
+  .ic-with:after{transform:scaleX(-1)}
+  .ic-with i{font-style:normal;position:relative;display:inline-block;padding:0 .5cqw;white-space:nowrap}
+  .ic-with i:before,.ic-with i:after{content:'\2756';position:absolute;top:50%;
+    transform:translateY(-50%);font-size:1.2cqw;line-height:1;color:#c8a24e;
+    font-family:Georgia,serif;opacity:.92;-webkit-text-fill-color:#c8a24e}
+  .ic-with i:before{left:-1.5cqw}
+  .ic-with i:after{right:-1.5cqw}
+  .inv-ur .ic-with{gap:2.1cqw}
+  .inv-ur .ic-with i{padding:0 .7cqw}
+  .inv-ur .ic-with i:before,.inv-ur .ic-with i:after{font-size:1.35cqw}
   .ic-parent{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:2.1cqw;letter-spacing:.01em;color:#6a4f2c;margin-top:.3cqw;text-wrap:balance}
   .ic-div{width:44%;border-top:1px solid #c8a24e;position:relative;margin:1.6cqw 0}
   .ic-div:before{content:'\2766';position:absolute;top:-1.4cqw;left:50%;transform:translateX(-50%);color:#b8892f;font-size:2cqw;background:#fdf3dc;padding:0 1.4cqw}
@@ -291,7 +308,7 @@
 
 <script src="./content.js?v=4"></script>
 <script src="./audio.js?v=2"></script>
-<script src="./letter3d.js?v=27"></script>
+<script src="./letter3d.js?v=28"></script>
 <script>
 (function(){
   "use strict";
@@ -512,7 +529,7 @@
         '<div class="ic-fl">&#10086;&#160;&#10087;&#160;&#10086;</div>' +
         '<div class="ic-name">'+esc(d.groom)+'</div>' +
         '<div class="ic-parent">'+esc(d.groomParent)+'</div>' +
-        '<div class="ic-with">'+esc(d.withWord)+'</div>' +
+        '<div class="ic-with"><i>'+esc(d.withWord)+'</i></div>' +
         '<div class="ic-name">'+esc(d.bride)+'</div>' +
         '<div class="ic-parent">'+esc(d.brideParent)+'</div>' +
         '<div class="ic-div"></div>' +
