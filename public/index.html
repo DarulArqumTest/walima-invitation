@@ -47,22 +47,33 @@
   .ic-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:4.3cqw;line-height:1.04;color:#7C2A38;letter-spacing:-.01em;white-space:nowrap}
   .ic-with{font-family:'Tangerine','Cormorant Garamond',serif;font-style:normal;font-weight:700;font-size:5.6cqw;line-height:.95;background:linear-gradient(#c49a3d,#9c7526);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* 'With' / بہمراہ is the word that joins the two names, so it is set as an
-     ornament rather than a label: gold lettering, tapered rules reaching out to
-     either side, and a small lozenge where each rule meets the word. */
-  .ic-with{display:flex;align-items:center;justify-content:center;gap:1.6cqw;width:100%}
-  .ic-with:before,.ic-with:after{content:'';flex:1 1 auto;max-width:22%;height:1px;
-    background:linear-gradient(90deg,rgba(200,162,78,0) 0%,rgba(200,162,78,.55) 55%,rgba(200,162,78,.95) 100%)}
-  .ic-with:after{transform:scaleX(-1)}
-  .ic-with i{font-style:normal;position:relative;display:inline-block;padding:0 .5cqw;white-space:nowrap}
+  /* بہمراہ / With is the word that binds the two names, so it is built as an
+     actual CHAIN LINK: a gold thread descends from the groom's name, passes
+     through a lozenge-flanked medallion carrying the word, and continues down
+     to the bride's. The thread is what does the joining; the word rides it. */
+  .ic-with{position:relative;display:flex;flex-direction:column;align-items:center;
+    width:100%;margin:.9cqw 0;gap:0;background:none;-webkit-text-fill-color:initial}
+  .ic-with:before,.ic-with:after{content:'';width:1.4px;height:2.1cqw;
+    background:linear-gradient(180deg,rgba(200,162,78,0),rgba(184,137,47,.95))}
+  .ic-with:after{background:linear-gradient(180deg,rgba(184,137,47,.95),rgba(200,162,78,0))}
+  .ic-with i{position:relative;font-style:normal;display:inline-flex;align-items:center;
+    justify-content:center;padding:.5cqw 3.2cqw;border-radius:999px;white-space:nowrap;
+    border:1px solid rgba(184,137,47,.55);
+    background:radial-gradient(120% 160% at 50% 0%,rgba(253,243,220,.95),rgba(247,232,198,.55));
+    box-shadow:inset 0 0 0 3px rgba(253,243,220,.85),0 1px 0 rgba(184,137,47,.28);
+    background-clip:padding-box}
   .ic-with i:before,.ic-with i:after{content:'\2756';position:absolute;top:50%;
-    transform:translateY(-50%);font-size:1.2cqw;line-height:1;color:#c8a24e;
-    font-family:Georgia,serif;opacity:.92;-webkit-text-fill-color:#c8a24e}
-  .ic-with i:before{left:-1.5cqw}
-  .ic-with i:after{right:-1.5cqw}
-  .inv-ur .ic-with{gap:2.1cqw}
-  .inv-ur .ic-with i{padding:0 .7cqw}
-  .inv-ur .ic-with i:before,.inv-ur .ic-with i:after{font-size:1.35cqw}
+    transform:translateY(-50%);font-size:1.5cqw;line-height:1;color:#b8892f;
+    font-family:Georgia,serif;-webkit-text-fill-color:#b8892f}
+  .ic-with i:before{left:-.55cqw}
+  .ic-with i:after{right:-.55cqw}
+  .ic-with i span{background:linear-gradient(180deg,#d8ae57,#9c7526);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    -webkit-text-fill-color:transparent}
+  .inv-ur .ic-with{margin:1.3cqw 0}
+  .inv-ur .ic-with:before,.inv-ur .ic-with:after{height:2.5cqw}
+  .inv-ur .ic-with i{padding:.85cqw 3.4cqw}
+  .inv-ur .ic-with i:before,.inv-ur .ic-with i:after{font-size:1.7cqw}
   .ic-parent{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:2.1cqw;letter-spacing:.01em;color:#6a4f2c;margin-top:.3cqw;text-wrap:balance}
   .ic-div{width:44%;border-top:1px solid #c8a24e;position:relative;margin:1.6cqw 0}
   .ic-div:before{content:'\2766';position:absolute;top:-1.4cqw;left:50%;transform:translateX(-50%);color:#b8892f;font-size:2cqw;background:#fdf3dc;padding:0 1.4cqw}
@@ -308,7 +319,7 @@
 
 <script src="./content.js?v=4"></script>
 <script src="./audio.js?v=2"></script>
-<script src="./letter3d.js?v=28"></script>
+<script src="./letter3d.js?v=29"></script>
 <script>
 (function(){
   "use strict";
@@ -529,7 +540,7 @@
         '<div class="ic-fl">&#10086;&#160;&#10087;&#160;&#10086;</div>' +
         '<div class="ic-name">'+esc(d.groom)+'</div>' +
         '<div class="ic-parent">'+esc(d.groomParent)+'</div>' +
-        '<div class="ic-with"><i>'+esc(d.withWord)+'</i></div>' +
+        '<div class="ic-with"><i><span>'+esc(d.withWord)+'</span></i></div>' +
         '<div class="ic-name">'+esc(d.bride)+'</div>' +
         '<div class="ic-parent">'+esc(d.brideParent)+'</div>' +
         '<div class="ic-div"></div>' +

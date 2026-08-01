@@ -566,7 +566,7 @@
     var panelMat=new THREE.MeshStandardMaterial({ color:0x073329, roughness:1.0, metalness:0.0, envMapIntensity:0.03 });   // fully matte — no per-candle specular smudges
     this._panelMat=panelMat;
     var PPW=PW*0.985, PPH=PH*0.99;
-    loadTex("./assets/front-paper.png?v=7", function(t){
+    loadTex("./assets/front-paper.png?v=8", function(t){
       t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;
       var planeAsp=PPW/PPH, imgAsp=(t.image.width/t.image.height);
       if(planeAsp>imgAsp){ t.repeat.set(1, imgAsp/planeAsp); t.offset.set(0,(1-imgAsp/planeAsp)/2); }

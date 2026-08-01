@@ -16,7 +16,7 @@ const ORIGINAL = path.join(A, 'front-paper.original.png');
 const SKETCH = path.join(A, 'couple-gold.png');
 
 // cartouche footprint, inset so the patch never reaches the floral wreath
-const P = { x: 246, y: 258, w: 408, h: 580 };
+const P = { x: 205, y: 225, w: 492, h: 640 };
 
 (async () => {
   const meta = await sharp(ORIGINAL).metadata();

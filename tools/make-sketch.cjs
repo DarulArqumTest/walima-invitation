@@ -108,7 +108,35 @@ function morph(mask, W, H, r, grow) {
   const pulled = morph(grown,   W, H, 12, false);
   // closing (dilate then erode by the same radius) seals small holes where the
   // hatching thins out, without pushing the outer silhouette any further
-  const sealed = morph(morph(pulled, W, H, 11, true), W, H, 11, false);
+  const sealed0 = morph(morph(pulled, W, H, 10, true), W, H, 10, false);
+  /* Fill only ENCLOSED holes. A big uniform closing would have filled the gap in
+     the bride's dress but also bridged the silhouette into a rectangle, so instead
+     flood the OUTSIDE of the body: any empty pixel the outside cannot reach is a
+     hole inside the figure and gets filled, while concave edges stay concave. */
+  const sealed = Uint8Array.from(sealed0);
+  {
+    const seen = new Uint8Array(N), st = [];
+    for (let x = 0; x < W; x++) { st.push(x); st.push((H - 1) * W + x); }
+    for (let y = 0; y < H; y++) { st.push(y * W); st.push(y * W + W - 1); }
+    while (st.length) {
+      const q = st.pop();
+      if (seen[q] || sealed0[q]) continue;
+      seen[q] = 1;
+      const x = q % W, y = (q / W) | 0;
+      if (x > 0) st.push(q - 1);
+      if (x < W - 1) st.push(q + 1);
+      if (y > 0) st.push(q - W);
+      if (y < H - 1) st.push(q + W);
+    }
+    let filled = 0;
+    for (let q = 0; q < N; q++) if (!sealed0[q] && !seen[q]) { sealed[q] = 255; filled++; }
+    console.log('enclosed holes filled: ' + filled + ' px');
+  }
+  // the seal radius can push the body past the artwork; clamp it back to the
+  // confident stroke bounds so nothing can ever reach the image border
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (x < gx0 || x > gx1 || y < gy0 || y > gy1) sealed[y * W + x] = 0;
+  }
   const soft = boxBlur(sealed, W, H, 3);
 
   // ---- 3. gold strokes over an ivory body ----
