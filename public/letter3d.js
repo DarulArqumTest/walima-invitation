@@ -18,6 +18,19 @@
 (function () {
   "use strict";
 
+  /* THE REVEAL — milliseconds from the moment the phone panel dismisses.
+     The music starts at 0 (muffled, behind the door). The vocal on the track begins
+     at ~4.5s, which is exactly when the doors part — the singing carries you in. */
+  var REVEAL = {
+    dark:      700,    // panel gone -> fade the hall to black
+    signStart: 700,    // WALIMA plaque begins to glow out of the dark
+    signEnd:  2700,
+    candle1:  2750,    // BAM. first sconce catches
+    candle2:  3600,    // BAM. second sconce — the room becomes visible
+    doorOpen: 4500,    // doors part, camera starts moving, the vocal lands
+    doorEnd:  9800,
+    total:   13000
+  };
   function easeInOut(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
   function easeOut(t){ return 1-Math.pow(1-t,3); }
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
@@ -671,6 +684,13 @@
     fw.add(box(8,0.5,0.5, hallWood, -6,-2.32,6.72)); fw.add(box(8,0.5,0.5, hallWood, 6,-2.32,6.72));
     // CORNICE at the ceiling line
     fw.add(box(20,0.3,0.55, railMat, 0,6.7,6.72)); fw.add(box(20,0.16,0.62, hallWood, 0,6.5,6.74));
+    // TALL SCREENS: a phone's frame is much taller than a desktop's, so the camera used to see
+    // straight over the top of this wall and past the leading edge of the corridor ceiling —
+    // that was the black band along the top on mobile. Carry the plaster up to the ceiling line
+    // and run the ceiling forward over the doorway so the room is closed at any aspect ratio.
+    fw.add(box(20,1.6,0.5, plaster(20,2), 0,7.65,6.72));                       // wall above the cornice
+    fw.add(box(20,0.3,1.4, new THREE.MeshStandardMaterial({color:0x2a2018,roughness:0.9}), 0,7.6,6.4));  // ceiling over the doorway
+    fw.add(box(20,0.22,0.4, railMat, 0,7.42,6.9));                              // small cornice return
     // ===== corridor the camera flies down =====
     fw.add(box(0.34,9,14, plaster(14,9), -6.0,3.25,13.4)); fw.add(box(0.34,9,14, plaster(14,9), 6.0,3.25,13.4));
     fw.add(box(0.4,3.1,14, hallWood, -5.86,-1.05,13.4)); fw.add(box(0.4,3.1,14, hallWood, 5.86,-1.05,13.4));
@@ -899,6 +919,16 @@
     var fTip=new THREE.Mesh(new THREE.ConeGeometry(0.03,0.16,16), new THREE.MeshBasicMaterial({color:0xff7a20,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,depthWrite:false})); fTip.position.y=0.17; flameG.add(fTip);
     // key light at the flame — warm ~1900K, strong inverse-square falloff
     var flame=this.lampLight=new THREE.PointLight(0xff9532, 5.2, 14, 2.2); flame.position.set(-1.5,deskTopY+2.08,0.4); flame.castShadow=true; scene.add(flame);
+    // Shadow acne fix. An unbiased point-light cube shadow map self-shadows every surface it
+    // touches, which showed up as black lines crawling over the doors and panelling as the
+    // candles came up and the camera moved. normalBias offsets the lookup along the surface
+    // normal — it kills the striping without the light leaking under objects (peter-panning).
+    flame.shadow.mapSize.width=flame.shadow.mapSize.height=this.mobile?1024:2048;
+    flame.shadow.bias=-0.0016;
+    flame.shadow.normalBias=0.045;
+    flame.shadow.radius=2.0;
+    flame.shadow.camera.near=0.35;
+    flame.shadow.camera.far=16;
     flame.shadow.mapSize.set(this.mobile?512:1024,this.mobile?512:1024); flame.shadow.camera.near=0.3; flame.shadow.camera.far=9; flame.shadow.normalBias=0.035; flame.shadow.bias=-0.0005; flame.shadow.radius=4;
     this._flameBaseInt=5.2; this._flameBasePos=flame.position.clone();
     var roomFill=new THREE.PointLight(0xffcf90, 0.55, 8, 2.2); roomFill.position.set(0.4,1.2,0.2); scene.add(roomFill);   // low even fill so the two candles do the grading; back wall stays dark
@@ -986,7 +1016,10 @@
       // Slow, graceful fade: the sign holds fully readable through the first part of the swing, then
       // dissolves gradually as the doors open (gone by ~68% open). It's parented to the frame (doesn't
       // rotate with the leaves), so a lingering fade reads as the sign dimming away, not a flat slab.
-      var pf=1-easeInOut(clamp((cp-0.12)/0.56,0,1));
+      // ...and it has to arrive first: _signGlow brings it up out of total darkness before
+      // any candle is lit, so the sign is the only thing in the frame for a beat.
+      var glowIn=(this._signGlow==null)?1:this._signGlow;
+      var pf=(1-easeInOut(clamp((cp-0.12)/0.56,0,1)))*glowIn;
       this.plaque.material.opacity=pf; this.plaque.visible=pf>0.002;
       if(this.plaqueGlow) this.plaqueGlow.material.opacity=pf*0.5;
     }
@@ -1003,10 +1036,21 @@
     }
     // ramp the render resolution back up as the doors start to open (replaces the expensive gate CSS blur)
     var self=this; [[0,0.5],[140,0.72],[300,1.0]].forEach(function(s){ setTimeout(function(){ self.setQuality(s[1]); }, s[0]); });
-    this.phase="intro"; this._pStart=performance.now(); this._durIntro=8700; this._flashT0=0;   // +40% — unhurried
+    // share the reveal clock with beginRead() so the beats and the music stay locked together
+    this.phase="intro"; this._pStart=this._readT0||performance.now(); this._durIntro=REVEAL.total; this._flashT0=0;
+    this._beats={};
+    var au=window.WalimaAudio;
+    if(au){ au.startMusic(); au.setMuffle(1, 0.1); }
   };
 
-  WeddingBook.prototype.beginRead=function(){ this._readT0=performance.now(); };  // read-beat: light seeps up over ~2.2s
+  /* fire a one-shot beat once the reveal clock passes `atMs` */
+  WeddingBook.prototype._beat=function(name, atMs, now, fn){
+    if(!this._beats || this._beats[name]) return;
+    if(this._readT0==null || (now-this._readT0) < atMs) return;
+    this._beats[name]=1; try{ fn(); }catch(e){}
+  };
+
+  WeddingBook.prototype.beginRead=function(){ this._readT0=performance.now(); };  // starts the reveal clock
   // ignition curve: 0 until (readT0+delay), a quick strike/flare to ~1.35 over 150ms, settling to 1.0 over the next 400ms
   WeddingBook.prototype._ignAt=function(now, delayMs){
     if(this._readT0==null) return 0;
@@ -1019,8 +1063,29 @@
   WeddingBook.prototype._introFrame=function(now){
     var portal=(this.phase==="portal");
     if(portal && !this._portalT0) this._portalT0=now;
-    // read-beat seep: 0 during gate, ramps to 1 across ~2.2s once beginRead() fires
-    this._readSeep = this._readT0 ? clamp((now-this._readT0)/2200,0,1) : 0;
+    // room brightness follows the CANDLES, not the clock: pitch dark until the first
+    // sconce catches at REVEAL.candle1, then up over 1.5s (covering the second strike).
+    var rel = this._readT0 ? (now-this._readT0) : -1;
+    this._readSeep = (rel<0 || portal) ? 0 : clamp((rel-REVEAL.candle1)/1500,0,1);
+    // the WALIMA plaque glowing up out of total darkness
+    this._signGlow = (rel<0 || portal) ? (portal?1:0)
+                   : easeInOut(clamp((rel-REVEAL.signStart)/(REVEAL.signEnd-REVEAL.signStart),0,1));
+    // fade the dim hall to black the instant the panel goes
+    this._darkT = (rel<0 || portal) ? 0 : clamp(rel/REVEAL.dark,0,1);
+
+    if(!portal){
+      var self=this, au=window.WalimaAudio;
+      this._beat("sign",  REVEAL.signStart, now, function(){ au&&au.sfx("signGlow"); });
+      this._beat("cd1",   REVEAL.candle1,   now, function(){ au&&au.sfx("candleLight", 0); });
+      this._beat("cd2",   REVEAL.candle2,   now, function(){ au&&au.sfx("candleLight", 0); });
+      this._beat("door",  REVEAL.doorOpen,  now, function(){
+        if(au){ au.sfx("doorOpen"); au.setMuffle(0.5, 3.2); }   // door parts — music opens up
+      });
+      this._beat("thru",  REVEAL.doorOpen+3800, now, function(){
+        if(au){ au.sfx("whoosh"); au.setMuffle(0.1, 2.6); }     // moving through the doorway
+      });
+      this._beat("insid", REVEAL.total-900, now, function(){ au&&au.setMuffle(0, 1.4); });
+    }
     var t = portal ? clamp((now-this._portalT0)/26000,0,1)*0.14   // slow continuous forward drift during the gate
                    : clamp((now-this._pStart)/this._durIntro,0,1);
     var e=easeInOut(t);
@@ -1029,15 +1094,17 @@
     // in as the envelope begins; the envelope lifts from ~55% — a breath after the doors settle.
     // door swing: a SINGLE gentle ease over a wide, later window so the leaves accelerate softly and
     // glide to rest (no double-ease "smashed open" spike in the middle); finishes ~56% into the intro.
-    this._setDoors(portal?0:seg(t,0.03,0.56));
-    // camera dolly: far, showing full doors + casing + floor + headroom -> settle to envelope pose.
-    // extra ease so it decelerates into a hold on the centred envelope (no constant-velocity move).
-    var ce=easeInOut(seg(t,0.0,0.94));
+    // doors hold shut through the dark/sign/candle beats, then part from REVEAL.doorOpen
+    var dS=REVEAL.doorOpen/REVEAL.total, dE=REVEAL.doorEnd/REVEAL.total;
+    this._setDoors(portal?0:seg(t,dS,dE));
+    // camera dolly: holds still while the candles light (you are standing in the dark looking at
+    // the door), then travels in with the swing and decelerates onto the envelope.
+    var ce=easeInOut(seg(t,dS,0.97));
     this.cam.position.set(0, lerp(1.55,0.06,ce), lerp(20.0,4.7,ce));
     this.cam.lookAt(0, lerp(1.15,0.06,ce), lerp(6.5,0,ce));
     // envelope: lift is a FUNCTION of the rotation (single arc) so the lowest corner clears the
     // desk at every frame — peak height at mid-rotation, where the swinging corner is lowest.
-    var rise=portal?0:easeInOut(seg(t,0.55,0.98));   // starts before the camera fully settles; small hold at the top
+    var rise=portal?0:easeInOut(seg(t,0.74,0.99));   // starts before the camera fully settles; small hold at the top
     var rot=easeInOut(seg(rise,0.05,0.95));
     var baseY=lerp(-0.68,0,rot);
     var ey=baseY + 0.36*Math.sin(rot*Math.PI);
@@ -1046,11 +1113,16 @@
     this.env.position.y=ey;
     if(this.bloom) this.bloom.strength=0.18;
     if(this.interior) this.interior.intensity=0;
-    // dim the scene during the gate, brighten as phone number is entered (readSeep → 1)
-    if(this.ambient) this.ambient.intensity=0.18 + this._readSeep*0.72;
+    // Gate: a dim, readable hall. Then the panel goes and the hall fades to BLACK (darkT),
+    // and the only thing that brings it back is the candles catching (readSeep).
+    if(this.ambient){
+      var gateAmb=0.18, darkAmb=0.015;
+      this.ambient.intensity = portal ? gateAmb
+        : lerp(gateAmb, darkAmb, this._darkT) + this._readSeep*0.885;
+    }
     // RADIAL (zoom) blur driven by camera speed — centre sharp, off entirely at the desk. No flash/exposure ramp.
-    // reduce exposure during gate to make it dimmer; brighten as readSeep increases
-    if(this.renderer) this.renderer.toneMappingExposure=portal?0.65:(0.82 + (1-this._readSeep)*0.08);
+    // gate sits dim; the dark beat pulls exposure down further; the candles bring it back
+    if(this.renderer) this.renderer.toneMappingExposure=portal?0.65:lerp(0.65,0.90,this._readSeep);
     if(this.radialPass){
       var cz=this.cam.position.z, spd=(this._lastCamZ==null)?0:Math.abs(this._lastCamZ-cz); this._lastCamZ=cz;
       var target=portal?0:clamp(spd*0.9,0,0.65);
@@ -1093,6 +1165,17 @@
   };
   WeddingBook.prototype.skip=function(){ this.pA=1; this.pB=1; this.phase="done";
     if(!this.settled){ this.settled=true; if(this.onOpened) this.onOpened(); } };
+  /* Returning guest who has already sealed their RSVP: park the scene in its finished
+     state WITHOUT firing onOpened (the caller is showing the invitation itself). */
+  WeddingBook.prototype.skipToSettled=function(){
+    this.pA=1; this.pB=1; this.phase="done"; this.settled=true;
+    this._readT0=performance.now()-REVEAL.total;
+    this._readSeep=1; this._signGlow=0; this._darkT=1;
+    if(this.frontWall) this.frontWall.visible=false;
+    if(this.ambient) this.ambient.intensity=0.9;
+    if(this.renderer) this.renderer.toneMappingExposure=0.9;
+    this.setQuality(1);
+  };
   WeddingBook.prototype.setStepMode=function(on){ this.stepMode=!!on; };
   WeddingBook.prototype.reject=function(){ this._rejectStart=performance.now(); };
   WeddingBook.prototype.setLanguage=function(l){ this._lang=l; if(this._applyCardTex) this._applyCardTex(); };
@@ -1101,8 +1184,10 @@
     var W=this.glMount.clientWidth||window.innerWidth, H=this.glMount.clientHeight||window.innerHeight;
     var asp=W/H;
     this.cam.aspect=asp;
-    // portrait: widen the (vertical) FOV so the desk + envelope aren't cropped by the narrow frame
-    this.cam.fov = asp<1 ? Math.min(62, 34/Math.max(asp,0.5)) : 34;
+    // Portrait needs a wider vertical FOV so the door and desk aren't cropped side-to-side, but
+    // 62 was too much — it pushed the view above the room. 48 fits the doorway on a 20:9 phone
+    // while keeping the ceiling in frame.
+    this.cam.fov = asp<1 ? clamp(34/Math.max(asp,0.52), 34, 48) : 34;
     this.cam.updateProjectionMatrix();
     var cap=Math.min(window.devicePixelRatio, this.mobile?1.5:2);
     var q=this._qual==null?1:this._qual;
@@ -1137,7 +1222,7 @@
     // hold values between. Candlelight doesn't need 60Hz updates and it halves this block's cost.
     var doFlick = (now-(this._lastFlick||0))>=42;
     if(doFlick){ this._lastFlick=now;
-    var ignL=this._ignAt(now,0);
+    var ignL=this._ignAt(now,REVEAL.candle1);
     if(this.lampLight){
       var n=Math.sin(tsec*11.0)*0.5+Math.sin(tsec*17.3)*0.3+Math.sin(tsec*6.1)*0.2;
       this.lampLight.intensity=this._flameBaseInt*(1+n*0.10)*ignL;
@@ -1147,13 +1232,13 @@
     if(this.lampLight2){
       var o=2.7;
       var n2=Math.sin((tsec+o)*12.4)*0.5+Math.sin((tsec+o)*8.1)*0.3+Math.sin((tsec+o)*19.7)*0.2;
-      var ignL2=this._ignAt(now,70);   // right desk candle catches a touch after the left
+      var ignL2=this._ignAt(now,REVEAL.candle2+70);   // right desk candle catches a touch after the left
       this.lampLight2.intensity=this._flame2BaseInt*(1+n2*0.11)*ignL2;
       if(this.candleFlame2){ var gL2=Math.min(1,ignL2); this.candleFlame2.visible=ignL2>0.02; this.candleFlame2.scale.set((1+n2*0.04)*gL2, (1+n2*0.09)*gL2, (1+n2*0.04)*gL2); this.candleFlame2.rotation.z=Math.sin((tsec+1.4)*2.7)*0.1; }
     }
     if(this.sconceLights){ for(var si=0;si<this.sconceLights.length;si++){ var S=this.sconceLights[si];
       var ns=Math.sin((tsec+S.off)*10.2)*0.5+Math.sin((tsec+S.off)*15.6)*0.3+Math.sin((tsec+S.off)*7.4)*0.2;
-      var igS=this._ignAt(now, si*120);   // stagger the two sconces by ~120ms so they don't ignite in unison
+      var igS=this._ignAt(now, si===0?REVEAL.candle1:REVEAL.candle2);   // one sconce, then the other — a beat apart
       S.light.intensity=S.base*(1+ns*0.12)*igS;
       if(S.flame){ var gS=Math.min(1,igS); S.flame.visible=igS>0.02; S.flame.scale.set((1+ns*0.04)*gS,(1+ns*0.09)*gS,(1+ns*0.04)*gS); S.flame.rotation.z=Math.sin((tsec+S.off)*2.5)*0.1; }
     } }
@@ -1172,8 +1257,19 @@
       if(this._cardMat.emissiveIntensity!==eI){ this._cardMat.emissiveIntensity=eI; this._cardMat.needsUpdate=false; }
     }
     if(this.phase==="seq"){ this.pA=clamp((now-this._pStart)/this._durA,0,1);
+      // sound for each stage of the envelope opening, keyed off the same STOPS the animation uses
+      var au=window.WalimaAudio, pa=this.pA, sq=(this._seqFx=this._seqFx||{});
+      function fx(k,at,fn){ if(!sq[k] && pa>=at){ sq[k]=1; try{ fn(); }catch(e){} } }
+      fx("lift", 0.02, function(){ au&&au.sfx("lift"); });
+      fx("seal", 0.16, function(){ au&&au.sfx("sealCrack"); });
+      fx("flap", 0.26, function(){ au&&au.sfx("paper", 4); });
+      fx("flip", 0.50, function(){ au&&au.sfx("flip"); });
+      fx("open", 0.86, function(){ au&&au.sfx("paper", 5); });
       if(this.pA>=1){ this.phase="hold"; if(this.onFlapOpen) this.onFlapOpen();
-        if(this.reduced){ this.phase="extract"; this._pStart=now; this._durB=500; } } }
+        // the letter comes out on its own — no extra tap required
+        this.phase="extract"; this._pStart=now; this._durB=this.reduced?500:4200;
+        if(au) au.sfx("slide");
+      } }
     else if(this.phase==="step"){ var st=clamp((now-this._pStart)/this._durStep,0,1);
       this.pA=lerp(this._pFrom,this._pTarget,easeInOut(st));
       if(st>=1){
@@ -1181,7 +1277,9 @@
         else { this.phase="pause"; if(this.onStageReached) this.onStageReached(this._stepIdx+3); }
       } }
     else if(this.phase==="extract"){ this.pB=clamp((now-this._pStart)/this._durB,0,1);
-      if(this.pB>=1 && !this.settled){ this.phase="done"; this.settled=true; if(this.onOpened) this.onOpened(); } }
+      if(this.pB>=1 && !this.settled){ this.phase="done"; this.settled=true;
+        if(window.WalimaAudio) window.WalimaAudio.sfx("settle");
+        if(this.onOpened) this.onOpened(); } }
     var pA=this.pA, pB=this.pB, active=this.phase!=="idle";
 
     // idle float

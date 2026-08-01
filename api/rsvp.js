@@ -11,10 +11,19 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const { rows } = await sql`
-      select attending, party_size, message, locked, submitted_at
+      select attending, party_size, message, locked, submitted_at, host_note, note_seen
       from rsvps where guest_id = ${gid}
       order by submitted_at desc limit 1`;
-    res.status(200).json({ ok: true, rsvp: rows[0] || null });
+    const r = rows[0] || null;
+    if (r && r.note_seen) r.host_note = null;   // only surface a note the guest hasn't read
+    res.status(200).json({ ok: true, rsvp: r });
+    return;
+  }
+
+  // PATCH /api/rsvp — the guest acknowledging the hosts' note
+  if (req.method === 'PATCH') {
+    await sql`update rsvps set note_seen = true where guest_id = ${gid}`;
+    res.status(200).json({ ok: true });
     return;
   }
 

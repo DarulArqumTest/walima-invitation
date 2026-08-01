@@ -58,10 +58,19 @@ export default async function handler(req, res) {
     await sql`create index if not exists idx_edit_requests_status on edit_requests(status)`;
     console.log('✓ indexes created');
 
+    // --- migrations (idempotent) ---
+    // Hosts answer an edit request by adjusting the RSVP themselves and leaving a note, rather
+    // than reopening the form and waiting for the guest to come back and resubmit.
+    await sql`alter table rsvps add column if not exists host_note text`;
+    await sql`alter table rsvps add column if not exists note_seen boolean default false`;
+    await sql`alter table rsvps add column if not exists edited_by_host boolean default false`;
+    console.log('✓ host-note columns');
+
     res.status(200).json({
       ok: true,
       message: 'Database schema setup complete!',
-      tables: ['guests', 'rsvps', 'edit_requests']
+      tables: ['guests', 'rsvps', 'edit_requests'],
+      migrations: ['rsvps.host_note', 'rsvps.note_seen', 'rsvps.edited_by_host']
     });
   } catch (error) {
     console.error('Setup error:', error);

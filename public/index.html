@@ -61,12 +61,22 @@
   .inv-ur .ic-date,.inv-ur .ic-loc{font-family:'Noto Nastaliq Urdu',serif;line-height:1.65}
   .inv-ur .ic-date{font-size:1.65cqw}
   .inv-ur .ic-venue{font-family:'Noto Nastaliq Urdu',serif;font-size:2.2cqw;line-height:1.4}
-  .inv-footer{position:relative;width:min(94%,520px);margin:clamp(16px,2.4vw,26px) auto 6px;padding:clamp(18px,2.6vw,26px) clamp(20px,3vw,34px);border-radius:9px;background:linear-gradient(#0d4b38,#08301f);border:1px solid rgba(232,200,126,.4);color:#f0e4c8;text-align:center;box-shadow:0 20px 50px -24px rgba(0,0,0,.8), inset 0 0 0 1px rgba(232,200,126,.14)}
+  /* footer now matches the rose-and-gold card rather than the old emerald */
+  .inv-footer{position:relative;width:min(94%,520px);margin:clamp(30px,4.4vw,44px) auto 6px;padding:clamp(26px,3.4vw,34px) clamp(20px,3vw,34px) clamp(18px,2.6vw,26px);border-radius:9px;background:linear-gradient(#c0335f,#8e1c3e);border:1px solid rgba(247,214,140,.5);color:#fdeede;text-align:center;box-shadow:0 20px 50px -24px rgba(0,0,0,.8), inset 0 0 0 1px rgba(247,214,140,.18)}
   .inv-ur .inv-footer{direction:rtl}
-  .rsvp-ribbon{position:absolute;left:50%;top:-40px;transform:translateX(-50%);z-index:6;cursor:pointer;width:138px;padding:11px 0 9px;border-radius:5px 5px 0 0;text-align:center;font-family:'EB Garamond',Georgia,serif;font-size:12.5px;letter-spacing:.2em;font-weight:600;color:#fff1d6;background:linear-gradient(#a83247,#7c1f31 62%,#631726);box-shadow:0 12px 24px -8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 0 rgba(0,0,0,.3)}
-  .rsvp-ribbon:after{content:'';position:absolute;left:0;right:0;bottom:-12px;height:13px;background:#631726;clip-path:polygon(0 0,100% 0,100% 100%,50% 52%,0 100%)}
-  .rsvp-ribbon:hover{background:linear-gradient(#b93a51,#8a2537 62%,#6e1a2b)}
-  .rsvp-ribbon .ar{display:block;margin-top:2px;font-size:16px;line-height:1;animation:ribbonBob 1.9s ease-in-out infinite}
+  /* the ribbon IS the RSVP control — sized so it never overlaps the PROGRAMME rule beneath it */
+  .rsvp-ribbon{position:absolute;left:50%;top:-22px;transform:translateX(-50%);z-index:6;cursor:pointer;
+    width:auto;min-width:120px;max-width:82%;white-space:nowrap;padding:12px 26px 11px;border-radius:4px;
+    text-align:center;font-family:'EB Garamond',Georgia,serif;font-size:clamp(11.5px,1.5vw,13px);letter-spacing:.22em;font-weight:600;color:#fff1d6;
+    background:linear-gradient(#8e2740,#5f1428);border:1px solid rgba(247,214,140,.42);
+    box-shadow:0 14px 28px -10px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.18);
+    transition:filter .25s ease, transform .14s ease}
+  .rsvp-ribbon:hover{filter:brightness(1.16)}
+  .rsvp-ribbon:active{transform:translateX(-50%) translateY(1px)}
+  /* venue map pin */
+  .venue-pin{display:inline-flex;align-items:center;gap:.32em;margin-inline-start:.45em;color:#a9532f;text-decoration:none;font-size:.82em;vertical-align:baseline;border-bottom:1px dotted rgba(169,83,47,.5)}
+  .venue-pin:hover{color:#7c2a38;border-bottom-color:rgba(124,42,56,.7)}
+  .venue-pin svg{width:1em;height:1em;flex:0 0 auto}
   .if-title{font-size:clamp(11px,1.2vw,13px);letter-spacing:.26em;text-transform:uppercase;color:#e6c98a;font-weight:600}
   .if-title:before,.if-title:after{content:'\2014';opacity:.5;margin:0 8px}
   .if-prog{width:min(90%,300px);margin:14px auto 0;display:flex;flex-direction:column;gap:8px}
@@ -82,21 +92,52 @@
 
   /* ===== gate / language / overlays ===== */
   .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:8}
-  .card-shell{display:flex;flex-direction:column;align-items:center;gap:15px;width:min(90vw,392px);text-align:center;padding:34px 28px;border-radius:14px;background:radial-gradient(130% 120% at 50% 26%, rgba(10,7,4,.66), rgba(10,7,4,.34));backdrop-filter:blur(3px);box-shadow:0 34px 90px -30px rgba(0,0,0,.85), inset 0 0 0 1px rgba(232,200,126,.2)}
-  .lbl{color:#d8b878;font-size:clamp(14px,1.8vw,18px);line-height:1.45}
-  .fld{width:100%;border:1px solid rgba(232,200,126,.3);border-radius:4px;background:linear-gradient(rgba(8,5,2,.72),rgba(20,13,7,.72));box-shadow:inset 0 2px 8px rgba(0,0,0,.7)}
-  .fld.err{border-color:#d97a5a}
-  .fld input{width:100%;min-height:50px;padding:14px 16px;border:0;outline:none;background:transparent;color:#E8C87E;font-size:16px;text-align:center;letter-spacing:.02em;font-family:inherit}
-  .btn{width:100%;min-height:50px;padding:14px 18px;border:1px solid rgba(232,200,126,.5);border-radius:4px;background:linear-gradient(rgba(58,42,22,.9),rgba(36,22,9,.9));color:#F0E4C8;font-size:13px;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:box-shadow .3s ease, background .3s ease}
-  .btn:hover{box-shadow:0 0 22px rgba(232,200,126,.45);background:linear-gradient(rgba(74,54,32,.95),rgba(44,28,13,.95))}
+  /* ---- gate: a brass presentation plate rather than a web form ---- */
+  .card-shell{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;width:min(92vw,430px);text-align:center;padding:clamp(30px,5vw,44px) clamp(24px,4.5vw,38px) clamp(26px,4vw,36px);border-radius:3px;
+    background:linear-gradient(168deg,rgba(18,13,7,.90),rgba(7,5,3,.94));
+    backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);
+    box-shadow:0 40px 110px -34px rgba(0,0,0,.92), 0 0 0 1px rgba(232,200,126,.22), inset 0 1px 0 rgba(255,232,180,.10)}
+  .card-shell:before{content:'';position:absolute;inset:7px;border:1px solid rgba(232,200,126,.16);border-radius:1px;pointer-events:none}
+  .gate-orn{color:#c9a45e;font-size:15px;letter-spacing:.5em;line-height:1;margin-bottom:14px;opacity:.85}
+  .lbl{color:#f2e2bb;font-family:'Cormorant Garamond',serif;font-size:clamp(20px,3vw,26px);font-weight:600;line-height:1.35;margin-bottom:4px}
+  .lbl-sub{color:rgba(232,200,126,.62);font-size:clamp(11px,1.4vw,12.5px);letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px}
+  .fld{display:flex;align-items:stretch;width:100%;border:0;border-radius:2px;background:rgba(0,0,0,.42);
+    box-shadow:inset 0 0 0 1px rgba(232,200,126,.28), inset 0 2px 10px rgba(0,0,0,.6);transition:box-shadow .25s ease}
+  .fld:focus-within{box-shadow:inset 0 0 0 1px rgba(232,200,126,.62), inset 0 2px 10px rgba(0,0,0,.6), 0 0 20px -4px rgba(232,200,126,.28)}
+  .fld.err{box-shadow:inset 0 0 0 1px #d97a5a, inset 0 2px 10px rgba(0,0,0,.6)}
+  .fld input{flex:1;width:100%;min-height:54px;padding:14px 16px;border:0;outline:none;background:transparent;color:#F2E2BB;font-size:17px;text-align:left;letter-spacing:.06em;font-family:inherit}
+  .fld input::placeholder{color:rgba(232,200,126,.34);letter-spacing:.02em}
+  /* country dial code */
+  .cc{position:relative;display:flex;align-items:center;flex:0 0 auto}
+  .cc:after{content:'';position:absolute;right:0;top:11px;bottom:11px;width:1px;background:rgba(232,200,126,.24)}
+  .cc select{appearance:none;-webkit-appearance:none;border:0;outline:none;background:transparent;cursor:pointer;
+    color:#E8C87E;font-family:inherit;font-size:16px;letter-spacing:.04em;padding:14px 26px 14px 16px;min-height:54px}
+  .cc select option{background:#100b06;color:#E8C87E}
+  .cc .chev{position:absolute;right:11px;pointer-events:none;color:rgba(232,200,126,.6);font-size:9px;line-height:1}
+  .btn{width:100%;min-height:54px;margin-top:14px;padding:15px 18px;border:0;border-radius:2px;
+    background:linear-gradient(#8d6c2f,#5d451b);color:#fff6e0;font-size:12.5px;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;font-family:inherit;
+    box-shadow:inset 0 1px 0 rgba(255,236,190,.32), inset 0 -1px 0 rgba(0,0,0,.34), 0 10px 24px -12px rgba(0,0,0,.8);
+    transition:filter .25s ease, transform .12s ease}
+  .btn:hover{filter:brightness(1.14)}
+  .btn:active{transform:translateY(1px)}
   .btn[disabled]{opacity:.5;cursor:default;box-shadow:none}
   .btn.ghost{background:transparent;text-transform:none;letter-spacing:.03em;border-color:rgba(232,200,126,.35);font-size:14px}
   .err-msg{font-size:13.5px;line-height:1.5;color:#d97a5a;text-shadow:0 1px 6px rgba(0,0,0,.6)}
-  .lang-title{color:#f0dcab;font-family:'Cormorant Garamond',serif;font-size:clamp(23px,3.2vw,29px);line-height:1.3;text-shadow:0 2px 16px rgba(0,0,0,.7);text-align:center}
-  .lang-row{display:flex;gap:14px;width:min(88vw,392px);margin-top:20px}
-  .lang-btn{flex:1;min-height:74px;border:1px solid rgba(232,200,126,.5);border-radius:8px;background:linear-gradient(rgba(20,13,7,.8),rgba(8,5,2,.8));color:#f0e4c8;font-size:20px;cursor:pointer;font-family:'Cormorant Garamond',serif;transition:box-shadow .3s ease}
-  .lang-btn:hover{box-shadow:0 0 22px rgba(232,200,126,.4)}
-  .lang-btn.ur{font-family:'Noto Nastaliq Urdu',serif;font-size:26px}
+  /* ---- language: centred over a blurred scene, the question is the whole screen ---- */
+  #lang{backdrop-filter:blur(16px) brightness(.42);-webkit-backdrop-filter:blur(16px) brightness(.42);background:rgba(6,4,2,.34)}
+  .lang-panel{display:flex;flex-direction:column;align-items:center;width:min(94vw,560px);text-align:center}
+  .lang-orn{color:#c9a45e;font-size:15px;letter-spacing:.5em;line-height:1;margin-bottom:22px;opacity:.8}
+  .lang-title{color:#f6ead0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(26px,4.6vw,40px);line-height:1.25;text-shadow:0 3px 22px rgba(0,0,0,.85);text-align:center;text-wrap:balance}
+  .lang-title-ur{color:#f0dcab;font-family:'Noto Nastaliq Urdu',serif;font-size:clamp(17px,2.9vw,25px);line-height:2.1;margin-top:14px;text-shadow:0 3px 22px rgba(0,0,0,.85);direction:rtl}
+  .lang-row{display:flex;gap:clamp(12px,2.4vw,20px);width:min(92vw,470px);margin-top:clamp(26px,4.5vw,40px)}
+  .lang-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    min-height:clamp(84px,13vw,104px);border:0;border-radius:3px;cursor:pointer;color:#f6ead0;font-family:'Cormorant Garamond',serif;font-size:clamp(21px,3.1vw,27px);
+    background:linear-gradient(163deg,rgba(26,19,10,.94),rgba(9,6,3,.96));
+    box-shadow:0 0 0 1px rgba(232,200,126,.30), inset 0 1px 0 rgba(255,236,190,.10), 0 22px 50px -24px rgba(0,0,0,.9);
+    transition:box-shadow .3s ease, transform .18s ease, background .3s ease}
+  .lang-btn small{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:rgba(232,200,126,.58);font-family:'EB Garamond',serif}
+  .lang-btn:hover{transform:translateY(-2px);background:linear-gradient(163deg,rgba(38,28,14,.96),rgba(14,9,5,.97));box-shadow:0 0 0 1px rgba(232,200,126,.62), inset 0 1px 0 rgba(255,236,190,.16), 0 26px 56px -24px rgba(0,0,0,.92)}
+  .lang-btn.ur{font-family:'Noto Nastaliq Urdu',serif;font-size:clamp(23px,3.4vw,30px);line-height:1.9}
   .tap-hint{color:#f0e4c8;font-size:clamp(18px,3vw,28px);font-weight:600;letter-spacing:.28em;text-transform:uppercase;animation:softpulse 2s ease-in-out infinite;cursor:pointer;padding:24px 40px;text-shadow:0 4px 16px rgba(0,0,0,.6);background:rgba(10,7,4,.5);border-radius:12px;backdrop-filter:blur(4px);border:1px solid rgba(232,200,126,.25)}
   .overlay{position:absolute;inset:0;z-index:12;background:rgba(6,4,2,.72);display:flex;align-items:center;justify-content:center;padding:16px}
   .sheet{position:relative;width:min(94vw,620px);max-height:90vh;overflow-y:auto;border-radius:10px;box-shadow:0 50px 110px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(232,200,126,.16);background:linear-gradient(135deg,#123f30,#08281c);padding:clamp(22px,4vw,40px);color:#f0e4c8;text-align:center}
@@ -117,6 +158,16 @@
   .pill.yes{background:rgba(13,91,66,.5);border:1px solid #2f9e6f;color:#a9e8cc}
   .pill.no{background:rgba(91,30,30,.5);border:1px solid #b56;color:#e8b0b0}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:20;background:#0d3a2b;border:1px solid rgba(232,200,126,.4);color:#f0e4c8;padding:12px 22px;border-radius:8px;box-shadow:0 20px 50px -20px rgba(0,0,0,.8);font-size:14px}
+  /* ---- a note left for this guest by the hosts ---- */
+  #hostnote{backdrop-filter:blur(18px) brightness(.34);-webkit-backdrop-filter:blur(18px) brightness(.34);background:rgba(5,3,2,.52);z-index:16}
+  .note-sheet{position:relative;width:min(94vw,540px);padding:clamp(30px,5vw,46px) clamp(24px,4.4vw,42px) clamp(24px,4vw,36px);border-radius:3px;text-align:center;
+    background:linear-gradient(168deg,rgba(24,16,9,.95),rgba(8,5,3,.97));
+    box-shadow:0 44px 120px -36px rgba(0,0,0,.94), 0 0 0 1px rgba(232,200,126,.26), inset 0 1px 0 rgba(255,236,190,.10)}
+  .note-sheet:before{content:'';position:absolute;inset:7px;border:1px solid rgba(232,200,126,.15);pointer-events:none}
+  .note-orn{color:#c9a45e;font-size:14px;letter-spacing:.5em;margin-bottom:14px;opacity:.85}
+  .note-from{color:rgba(232,200,126,.62);font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;margin-bottom:16px}
+  .note-body{color:#f4e8cd;font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.6vw,23px);line-height:1.6;white-space:pre-wrap;text-wrap:pretty}
+  .inv-ur .note-body{font-family:'Noto Nastaliq Urdu',serif;direction:rtl;font-size:clamp(15px,2.2vw,19px);line-height:2}
   .bg{position:fixed;inset:0;overflow:hidden;background:radial-gradient(120% 90% at 50% 60%, #1c1206 0%, #100a05 46%, #060402 100%)}
 </style>
 </head>
@@ -138,7 +189,7 @@
         <div id="cartouche" class="inv-cartouche"></div>
       </div>
       <div id="inv-footer" class="inv-footer">
-        <div class="rsvp-ribbon" onclick="App.openRsvp()" dir="ltr" aria-label="RSVP below">RSVP BELOW<span class="ar">&#8595;</span></div>
+        <div class="rsvp-ribbon" onclick="App.openRsvp()" dir="ltr" role="button" tabindex="0" aria-label="Open the RSVP form">RSVP HERE</div>
         <div id="foot-title" class="if-title"></div>
         <div id="foot-prog" class="if-prog"></div>
       </div>
@@ -153,26 +204,32 @@
   <!-- GATE -->
   <div id="gate" class="screen hidden">
     <div id="gate-card" class="card-shell">
-      <div class="lbl">Please enter your phone number</div>
-      <div id="phone-fld" class="fld"><input id="phone" inputmode="tel" placeholder="Enter your phone number" aria-label="Phone number" autocomplete="tel"></div>
-      <button class="btn" onclick="App.verify()"><span id="gate-btn-label">Enter</span></button>
+      <div class="gate-orn">&#10086;&#160;&#10087;&#160;&#10086;</div>
+      <div class="lbl">Your invitation awaits</div>
+      <div class="lbl-sub">Please confirm your number</div>
+      <div id="phone-fld" class="fld">
+        <span class="cc">
+          <select id="cc" aria-label="Country dialling code"></select>
+          <span class="chev">&#9660;</span>
+        </span>
+        <input id="phone" inputmode="tel" placeholder="000 000 0000" aria-label="Phone number" autocomplete="tel">
+      </div>
+      <button class="btn" onclick="App.verify()"><span id="gate-btn-label">Open the invitation</span></button>
       <div id="gate-err" class="err-msg hidden"></div>
     </div>
   </div>
 
   <!-- LANGUAGE -->
-  <div id="lang" class="screen hidden" style="justify-content:flex-end;padding-bottom:12vh">
-    <div class="lang-title">In which language would you<br>like your invitation?</div>
-    <div class="lang-title" dir="rtl" lang="ur" style="font-family:'Noto Nastaliq Urdu',serif;font-size:clamp(18px,2.6vw,24px);line-height:2;margin-top:8px">آپ اپنا دعوت نامہ کس زبان میں دیکھنا چاہیں گے؟</div>
-    <div class="lang-row">
-      <button class="lang-btn" onclick="App.chooseLang('en')">English</button>
-      <button class="lang-btn ur" onclick="App.chooseLang('ur')">اردو</button>
+  <div id="lang" class="screen hidden">
+    <div class="lang-panel">
+      <div class="lang-orn">&#10086;&#160;&#10087;&#160;&#10086;</div>
+      <div class="lang-title">Would you like your invitation<br>in English or Urdu?</div>
+      <div class="lang-title-ur" lang="ur">کیا آپ اپنا دعوت نامہ انگریزی میں دیکھنا چاہیں گے یا اردو میں؟</div>
+      <div class="lang-row">
+        <button class="lang-btn" onclick="App.chooseLang('en')">English<small>English</small></button>
+        <button class="lang-btn ur" onclick="App.chooseLang('ur')" lang="ur">اردو<small>Urdu</small></button>
+      </div>
     </div>
-  </div>
-
-  <!-- TAKE-OUT PROMPT -->
-  <div id="takeout" class="screen hidden" style="justify-content:flex-end;padding-bottom:14vh" onclick="App.takeOut()">
-    <div id="takeout-hint" class="tap-hint">TAP TO OPEN YOUR INVITATION</div>
   </div>
 
   <!-- RSVP OVERLAY -->
@@ -183,11 +240,22 @@
     </div>
   </div>
 
+  <!-- MESSAGE FROM THE HOSTS -->
+  <div id="hostnote" class="overlay hidden">
+    <div class="note-sheet">
+      <div class="note-orn">&#10086;&#160;&#10087;&#160;&#10086;</div>
+      <div class="note-from">Message from the hosts</div>
+      <div id="note-body" class="note-body"></div>
+      <button class="btn" onclick="App.closeHostNote()">Thank you</button>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
 </div>
 
 <script src="./content.js"></script>
-<script src="./letter3d.js?v=19"></script>
+<script src="./audio.js?v=1"></script>
+<script src="./letter3d.js?v=20"></script>
 <script>
 (function(){
   "use strict";
@@ -202,6 +270,17 @@
       .then(function(r){ return r.json().catch(function(){return {ok:false};}).then(function(j){ j._status=r.status; return j; }); });
   }
   function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.add('hidden');},3200); }
+
+  // Dial codes. Canada/US first (the hosts), then Pakistan (the venue), then the rest.
+  var DIAL = [
+    ['+1','Canada / USA'], ['+92','Pakistan'], ['+44','United Kingdom'], ['+971','UAE'],
+    ['+966','Saudi Arabia'], ['+61','Australia'], ['+91','India'], ['+974','Qatar'],
+    ['+965','Kuwait'], ['+973','Bahrain'], ['+968','Oman'], ['+60','Malaysia'],
+    ['+65','Singapore'], ['+27','South Africa'], ['+49','Germany'], ['+33','France'],
+    ['+39','Italy'], ['+31','Netherlands'], ['+46','Sweden'], ['+47','Norway'],
+    ['+353','Ireland'], ['+64','New Zealand'], ['+90','Turkey'], ['+20','Egypt'],
+    ['+880','Bangladesh'], ['+62','Indonesia'], ['+86','China'], ['+81','Japan']
+  ];
 
   var App = {
     book:null, guest:null, lang:'en', rsvp:null, reduced:false,
@@ -230,32 +309,45 @@
       });
       this.book.setStepMode(false);
       this.book.onIntroDone = function(){ show('lang'); self._stage='lang'; };
-      this.book.onFlapOpen = function(){ if(self.reduced){ self.book.extractLetter&&self.book.extractLetter(); } else { show('takeout'); self._stage='takeout'; } };
+      // the letter now comes out by itself — no tap step in between
+      this.book.onFlapOpen = function(){ self._stage='extracting'; };
       this.book.onOpened = function(){ self.showInvitation(); };
       this.book.phase = 'portal';
       $('phone').addEventListener('keydown', function(e){ if(e.key==='Enter') self.verify(); });
+      // dial codes
+      var cc=$('cc');
+      cc.innerHTML = DIAL.map(function(d){ return '<option value="'+d[0]+'">'+d[0]+'</option>'; }).join('');
+      cc.title = DIAL.map(function(d){ return d[0]+'  '+d[1]; }).join('\n');
     },
 
     // ---------- gate ----------
     verify:function(){
-      var self=this, phone=($('phone').value||'').trim();
-      if(!phone){ return this._reject('Please enter your phone number.'); }
+      var self=this, local=($('phone').value||'').trim(), cc=($('cc')||{}).value||'';
+      // This click is the browser's required user gesture — the only moment audio can be armed.
+      if(window.WalimaAudio){ window.WalimaAudio.unlock(); window.WalimaAudio.sfx('tap'); }
+      if(!local){ return this._reject('Please enter your phone number.'); }
+      var phone = cc + local.replace(/[^\d]/g,'');
       $('gate-btn-label').textContent='Checking…';
-      api('/api/verify', { method:'POST', body:JSON.stringify({phone:phone}) }).then(function(j){
-        $('gate-btn-label').textContent='Enter';
+      api('/api/verify', { method:'POST', body:JSON.stringify({phone:phone, local:local, cc:cc}) }).then(function(j){
+        $('gate-btn-label').textContent='Open the invitation';
         if(j && j.ok && j.guest){
           self.guest = j.guest;
+          self.rsvp  = j.rsvp || null;
           self.lang = (j.guest.language==='ur') ? 'ur' : 'en';
           hide('gate-err');
-          self._enter();
+          // Already sealed? Don't make them sit through the whole reveal again —
+          // go straight to their response, then surface any note from the hosts.
+          if(self.rsvp && self.rsvp.locked) self._returning();
+          else self._enter();
         } else {
-          self._reject((j && j.message) || "We couldn't find that number. Please check with the couple.");
+          self._reject((j && j.message) || "We couldn't find that number. Please check with the hosts.");
         }
-      }).catch(function(){ $('gate-btn-label').textContent='Enter'; self._reject('Something went wrong. Please try again.'); });
+      }).catch(function(){ $('gate-btn-label').textContent='Open the invitation'; self._reject('Something went wrong. Please try again.'); });
     },
     _reject:function(msg){
       var e=$('gate-err'); e.textContent=msg; e.classList.remove('hidden');
       $('phone-fld').classList.add('err');
+      if(window.WalimaAudio) window.WalimaAudio.sfx('reject');
       var card=$('gate-card'); card.style.animation='gshake .48s'; setTimeout(function(){card.style.animation='';},500);
       if(this.book && this.book.reject) this.book.reject();
     },
@@ -264,7 +356,22 @@
       this._stage='opening';
       $('gate').style.transition='opacity .4s ease'; $('gate').style.opacity='0';
       setTimeout(function(){ hide('gate');
+        // beginRead() and playIntro() share one clock — the reveal beats and the music
+        // are locked together from this instant.
         if(self.book){ self.book.beginRead(); self.book.playIntro(self.reduced); }
+      }, 420);
+    },
+    // returning guest who has already sealed: skip the reveal entirely
+    _returning:function(){
+      var self=this;
+      this._stage='returning';
+      $('gate').style.transition='opacity .4s ease'; $('gate').style.opacity='0';
+      setTimeout(function(){
+        hide('gate');
+        if(self.book && self.book.skipToSettled) self.book.skipToSettled();
+        $('wb-gl').style.opacity='0';
+        self.showInvitation();
+        setTimeout(function(){ self._hostNote(); }, 1200);
       }, 420);
     },
 
@@ -274,9 +381,20 @@
       hide('lang'); this._stage='opening';
       if(this.book){ this.book.setLanguage(lang); this.book.open(this.reduced); }
     },
-    takeOut:function(){
-      hide('takeout'); this._stage='extracting';
-      if(this.book && this.book.extractLetter) this.book.extractLetter();
+    // ---------- a note left by the hosts ----------
+    _hostNote:function(){
+      var n = this.rsvp && this.rsvp.host_note;
+      if(!n || this._noteSeen) return;
+      $('note-body').textContent = n;
+      show('hostnote');
+      if(window.WalimaAudio) window.WalimaAudio.sfx('settle');
+    },
+    closeHostNote:function(){
+      var self=this;
+      this._noteSeen = true; hide('hostnote');
+      if(window.WalimaAudio) window.WalimaAudio.sfx('tap');
+      // tell the server we've shown it so it isn't surfaced again
+      api('/api/rsvp', { method:'PATCH' }).catch(function(){});
     },
 
     // ---------- settled invitation ----------
@@ -310,7 +428,12 @@
         '<div class="ic-div"></div>' +
         '<div class="ic-date">'+esc(d.date)+'</div>' +
         '<div class="ic-venue">'+esc(d.venue)+'</div>' +
-        '<div class="ic-loc">'+esc(d.venueLoc)+'</div>';
+        '<div class="ic-loc">'+esc(d.venueLoc)+
+          '<a class="venue-pin" href="'+C.VENUE_MAP+'" target="_blank" rel="noopener noreferrer" dir="ltr"' +
+          ' aria-label="'+esc(d.mapLabel||'View the venue on Google Maps')+'" title="'+esc(d.mapLabel||'View the venue on Google Maps')+'">' +
+          '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>' +
+          '<span>'+esc(d.mapWord||'Map')+'</span></a>' +
+        '</div>';
       $('inv-footer').setAttribute('dir', d.dir);
       $('foot-title').textContent = d.programmeTitle;
       $('foot-prog').innerHTML = d.programme.map(function(p){
@@ -355,7 +478,7 @@
           '<label>How many in your party? (max '+C.MAX_PARTY_SIZE+')</label>' +
           '<input id="party" type="number" min="1" max="'+C.MAX_PARTY_SIZE+'" value="'+((r&&r.party_size)||1)+'">' +
         '</div>' +
-        '<div class="field-row"><label>A note for the couple (optional)</label>' +
+        '<div class="field-row"><label>A note for the hosts (optional)</label>' +
           '<textarea id="msg" rows="3" placeholder="Your message…">'+esc(r&&r.message||'')+'</textarea></div>' +
         '<button class="btn" id="seal-btn" onclick="App.submitRsvp()">Seal &amp; send</button>';
       this._att = att;

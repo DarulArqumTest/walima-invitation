@@ -5,8 +5,11 @@
   "use strict";
   window.WalimaContent = {
     MAX_PARTY_SIZE: 6,
+    VENUE_MAP: "https://maps.app.goo.gl/j6fg7t1pyEC6q9V47",
     en: {
       dir: "ltr",
+      mapWord: "Map",
+      mapLabel: "View Orient Banquet on Google Maps",
       invite: "We cordially invite the pleasure of your company to grace the auspicious occasion of the Walima of",
       groom: "Muhammad Ashhad",
       groomParent: "the beloved son of Mr Ahmed Shemail and Mrs Munazzah Asif",
@@ -24,16 +27,18 @@
       ],
       greeting: "Dear",
       rsvpCta: "RSVP",
-      rsvpBelow: "RSVP BELOW"
+      rsvpHere: "RSVP HERE"
     },
     ur: {
       dir: "rtl",
-      invite: "بصد خوشی آپ کو تقریبِ ولیمہ میں شرکت کی پُرخلوص دعوت دیتے ہیں",
+      mapWord: "نقشہ",
+      mapLabel: "اورینٹ بینکوئٹ گوگل میپس پر دیکھیں",
+      invite: "بصد مسرّت آپ کو تقریبِ ولیمہ میں شرکت کی پر خلوص دعوت دی جاتی ہے",
       groom: "محمد اشہد",
-      groomParent: "فرزندِ جنابِ احمد شمائل و محترمہ منزّہ آصف",
+      groomParent: "فرزند احمد شمائل و منزّہ آصف",
       withWord: "بہمراہ",
       bride: "بسمہ کاشف",
-      brideParent: "دخترِ جنابِ کاشف علی و محترمہ عائشہ کاشف",
+      brideParent: "دختر کاشف علی و عائشہ کاشف",
       date: "بروز ہفتہ، ۷ جنوری ۲۰۲۷",
       venue: "اورینٹ بینکوئٹ",
       venueLoc: "گلستانِ جوہر، کراچی",
@@ -45,7 +50,7 @@
       ],
       greeting: "محترم",
       rsvpCta: "جواب دیں",
-      rsvpBelow: "جواب کے لیے نیچے دیکھیں"
+      rsvpHere: "جواب یہاں دیں"
     }
   };
 })();
