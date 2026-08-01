@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const { rows } = await sql`
-      select e.id, e.reason, e.requested_at, e.status, g.name, g.phone
+      select e.id, e.guest_id, e.reason, e.requested_at, e.status, g.name, g.phone
       from edit_requests e join guests g on g.id = e.guest_id
       where e.status = 'pending'
       order by e.requested_at asc`;

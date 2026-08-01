@@ -40,6 +40,27 @@
   th.sorted.desc:after{content:' \25BE'}
   tr:hover td{background:#faf8f2}
   .tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;letter-spacing:.02em;white-space:nowrap}
+  /* ---- edit-a-response dialog ---- */
+  .modal{position:fixed;inset:0;z-index:40;background:rgba(28,24,18,.5);display:flex;align-items:center;justify-content:center;padding:18px}
+  .modal[hidden]{display:none}
+  .modal-box{width:min(96vw,540px);max-height:92vh;overflow-y:auto;background:#fff;border-radius:14px;box-shadow:0 30px 70px -20px rgba(0,0,0,.4);padding:24px}
+  .modal-box h2{margin:0 0 3px;font-size:19px;font-weight:600}
+  .modal-box .who-sub{color:#8a8478;font-size:13.5px;margin-bottom:20px}
+  .fieldset{margin-bottom:18px}
+  .fieldset > label{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#8a8478;margin-bottom:7px}
+  .choice{display:flex;gap:8px;flex-wrap:wrap}
+  .choice button{flex:1;min-width:112px}
+  .choice button.on{background:#7c1f31;border-color:#7c1f31;color:#fff}
+  .stepper{display:flex;align-items:center;gap:10px}
+  .stepper input{width:88px;text-align:center;font-size:17px;font-variant-numeric:tabular-nums}
+  .stepper button{width:42px;padding:9px 0;font-size:17px;line-height:1}
+  .modal textarea{width:100%;font:inherit;padding:11px;border:1px solid #cfc7b6;border-radius:7px;background:#fff;outline:none;resize:vertical;min-height:96px}
+  .modal textarea:focus{border-color:#7c1f31}
+  .hint{font-size:12.5px;color:#8a8478;margin-top:7px;line-height:1.5}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap}
+  .note-live{background:#fdf7e6;border:1px solid #ecdcae;border-radius:8px;padding:10px 12px;font-size:13px;color:#6b5a2a;margin-top:9px}
+  .note-chip{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:20px;font-size:11px;background:#fdf1d6;border:1px solid #e8d29a;color:#7a5f1c;white-space:nowrap}
+  .edited-chip{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:20px;font-size:11px;background:#eef3ee;border:1px solid #cadfd0;color:#3f6b4c;white-space:nowrap}
   .tag.accepted{background:#e0f0e6;color:#1c6c47;border:1px solid #a9d8bf}
   .tag.declined{background:#f6e2e2;color:#9a3030;border:1px solid #e0b0b0}
   .tag.none{background:#efece3;color:#8a8478;border:1px solid #ddd6c6}
@@ -122,6 +143,47 @@
   </div>
 </div>
 
+<!-- EDIT A GUEST'S RESPONSE — change it yourself and tell them what you did,
+     instead of reopening the form and waiting for them to come back. -->
+<div id="edit-modal" class="modal" hidden>
+  <div class="modal-box">
+    <h2 id="em-name">Guest</h2>
+    <div id="em-sub" class="who-sub"></div>
+
+    <div class="fieldset">
+      <label>Attending</label>
+      <div class="choice" id="em-att">
+        <button data-v="yes" onclick="Admin.setAtt('yes')">Accepted</button>
+        <button data-v="no"  onclick="Admin.setAtt('no')">Declined</button>
+        <button data-v="none" onclick="Admin.setAtt('none')">No response</button>
+      </div>
+    </div>
+
+    <div class="fieldset" id="em-party-wrap">
+      <label>Party size</label>
+      <div class="stepper">
+        <button onclick="Admin.bumpParty(-1)" aria-label="One fewer">&minus;</button>
+        <input id="em-party" type="number" min="0" max="20" value="1">
+        <button onclick="Admin.bumpParty(1)" aria-label="One more">+</button>
+      </div>
+      <div class="hint">Counts toward <b>Total attending</b> as soon as you save.</div>
+    </div>
+
+    <div class="fieldset">
+      <label>Message to this guest</label>
+      <textarea id="em-note" placeholder="Hey! No problem — I've added one to your party for you. Hope to see you there :)"></textarea>
+      <div class="hint">They'll see this the next time they open their invitation. Saving a new message marks it unread again.</div>
+      <div id="em-note-live" class="note-live" hidden></div>
+    </div>
+
+    <div id="em-err" class="err" style="display:none"></div>
+    <div class="modal-actions">
+      <button onclick="Admin.closeEdit()">Cancel</button>
+      <button class="primary" id="em-save" onclick="Admin.saveEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   "use strict";
@@ -174,6 +236,7 @@
       var status = g.attending==null ? 'none' : (g.attending?'accepted':'declined');
       return { id:g.id, name:g.name||'', phone:g.phone||'', language:g.language||'en',
         status:status, party:g.attending?(g.party_size||1):0, message:g.message||'',
+        hostNote:g.host_note||'', noteSeen:!!g.note_seen, editedByHost:!!g.edited_by_host,
         submitted:g.submitted_at?new Date(g.submitted_at).getTime():0 };
     },
 
@@ -195,12 +258,66 @@
       list.innerHTML = this.requests.map(function(r){
         return '<div class="req"><div class="who">'+esc(r.name)+' <span class="muted">· '+esc(r.phone)+'</span></div>'+
           '<div class="reason">“'+esc(r.reason)+'”</div>'+
-          '<div class="row"><button class="primary small" onclick="Admin.resolve(\''+r.id+'\',\'approve\')">Approve &amp; reopen RSVP</button>'+
-          '<button class="small" onclick="Admin.resolve(\''+r.id+'\',\'deny\')">Decline</button></div></div>';
+          '<div class="row"><button class="primary small" onclick="Admin.openEdit(\''+r.guest_id+'\',\''+r.id+'\')">Make the change &amp; reply</button>'+
+          '<button class="small" onclick="Admin.resolve(\''+r.id+'\',\'deny\')">Dismiss</button></div></div>';
       }).join('');
     },
     resolve:function(id,action){
       api('/api/admin/edit-requests?id='+encodeURIComponent(id)+'&action='+action,{method:'POST'}).then(function(j){ if(j&&j.ok) Admin.refresh(); });
+    },
+
+    // ---------- edit a response directly ----------
+    _edit:null,
+    openEdit:function(guestId, reqId){
+      var r = this.guests.map(this._norm).filter(function(x){ return x.id===guestId; })[0];
+      if(!r) return;
+      this._edit = { id:guestId, reqId:reqId||null, att:r.status==='accepted'?'yes':(r.status==='declined'?'no':'none') };
+      $('em-name').textContent = r.name;
+      $('em-sub').textContent  = r.phone + (r.message ? ' · “'+r.message+'”' : '');
+      $('em-party').value = r.party || 1;
+      $('em-note').value = '';
+      $('em-err').style.display='none';
+      var live=$('em-note-live');
+      if(r.hostNote){ live.hidden=false; live.textContent = (r.noteSeen?'Current note (read): ':'Current note (unread): ') + r.hostNote; }
+      else { live.hidden=true; live.textContent=''; }
+      this.setAtt(this._edit.att);
+      $('edit-modal').hidden=false;
+    },
+    setAtt:function(v){
+      if(!this._edit) return;
+      this._edit.att=v;
+      Array.prototype.forEach.call($('em-att').children, function(b){ b.className = b.dataset.v===v ? 'on' : ''; });
+      $('em-party-wrap').style.display = v==='yes' ? 'block' : 'none';
+    },
+    bumpParty:function(d){
+      var el=$('em-party'); el.value = Math.max(0, Math.min(20, (parseInt(el.value,10)||0) + d));
+    },
+    closeEdit:function(){ $('edit-modal').hidden=true; this._edit=null; },
+    saveEdit:function(){
+      var e=this._edit; if(!e) return;
+      var att = e.att==='yes' ? true : (e.att==='no' ? false : null);
+      var body = { guest_id:e.id, attending:att };
+      if(e.att==='yes') body.party_size = Math.max(1, Math.min(20, parseInt($('em-party').value,10)||1));
+      else body.party_size = 0;
+      var note = ($('em-note').value||'').trim();
+      if(note) body.host_note = note;
+
+      var btn=$('em-save'); btn.disabled=true; btn.textContent='Saving…';
+      api('/api/admin/guests',{method:'PATCH',body:JSON.stringify(body)}).then(function(j){
+        btn.disabled=false; btn.textContent='Save changes';
+        if(j&&j.ok){
+          // a handled request shouldn't stay in the pending list
+          if(e.reqId){ api('/api/admin/edit-requests?id='+encodeURIComponent(e.reqId)+'&action=deny',{method:'POST'})
+            .then(function(){ Admin.closeEdit(); Admin.refresh(); })
+            .catch(function(){ Admin.closeEdit(); Admin.refresh(); }); }
+          else { Admin.closeEdit(); Admin.refresh(); }
+        } else {
+          $('em-err').textContent=(j&&j.error)||'Could not save.'; $('em-err').style.display='block';
+        }
+      }).catch(function(){
+        btn.disabled=false; btn.textContent='Save changes';
+        $('em-err').textContent='Network error.'; $('em-err').style.display='block';
+      });
     },
 
     render:function(){
@@ -224,13 +341,19 @@
                 : r.status==='declined'?'<span class="tag declined">Declined</span>'
                 : '<span class="tag none">No response</span>';
         return '<tr>'+
-          '<td>'+esc(r.name)+' '+(r.language==='ur'?'<span class="muted">· اردو</span>':'')+'</td>'+
+          '<td>'+esc(r.name)+' '+(r.language==='ur'?'<span class="muted">· اردو</span>':'')+
+            (r.hostNote && !r.noteSeen ? '<span class="note-chip">Note unread</span>' : '')+
+            (r.editedByHost ? '<span class="edited-chip">Edited by you</span>' : '')+
+          '</td>'+
           '<td class="hide-sm">'+esc(r.phone)+'</td>'+
           '<td>'+tag+'</td>'+
           '<td>'+(r.status==='accepted'?r.party:'<span class="muted">—</span>')+'</td>'+
           '<td class="hide-sm">'+(r.message?esc(r.message):'<span class="muted">—</span>')+'</td>'+
           '<td class="hide-sm muted">'+(r.submitted?new Date(r.submitted).toLocaleDateString():'—')+'</td>'+
-          '<td><button class="small danger" onclick="Admin.removeGuest(\''+r.id+'\',\''+esc(r.name).replace(/\x27/g,"")+'\')">Remove</button></td>'+
+          '<td style="white-space:nowrap">'+
+            '<button class="small" onclick="Admin.openEdit(\''+r.id+'\')">Edit</button> '+
+            '<button class="small danger" onclick="Admin.removeGuest(\''+r.id+'\',\''+esc(r.name).replace(/\x27/g,"")+'\')">Remove</button>'+
+          '</td>'+
         '</tr>';
       }).join('');
     },
