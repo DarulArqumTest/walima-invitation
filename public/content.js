@@ -40,7 +40,7 @@
   ];
 
   window.WalimaContent = {
-    MAX_PARTY_SIZE: 6,
+    MAX_PARTY_SIZE: 10,
     VENUE_MAP: "https://maps.app.goo.gl/j6fg7t1pyEC6q9V47",
     en: {
       dir: "ltr",

@@ -481,6 +481,10 @@
       var L=W*(ur?0.268:0.29), R=W*(1-(ur?0.268:0.29)), T=H*(ur?0.19:0.21), B=H*(ur?0.745:0.72);
       var cx=(L+R)/2, colW=R-L;
       var serif = ur ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif";
+      // the parents' line gets its own face, and 'With' a flowing script — it is the
+      // word that joins the two names, so it is drawn as a link rather than a label
+      var parentFace = ur ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif";
+      var linkFace   = ur ? "'Aref Ruqaa', 'Noto Nastaliq Urdu', serif" : "'Tangerine', 'Cormorant Garamond', cursive";
       var body  = ur ? "'Noto Nastaliq Urdu', serif" : "'EB Garamond', Georgia, serif";
       var u=W/1023;   // scale factor relative to the reference artwork
       x.textAlign="center"; x.textBaseline="alphabetic";
@@ -503,7 +507,7 @@
       var y=T+ (ur?40:30)*u;
       // bismillah
       y=lines("بِسْمِ اللّٰہِ الرَّحْمٰنِ الرَّحِیْمِ",
-        ((ur?28:22)*u)+"px 'Noto Nastaliq Urdu','Amiri',serif", "#a97f2c", (ur?28:22)*u, 1.7, y, colW);
+        ((ur?26:21)*u)+"px 'Aref Ruqaa','Amiri',serif", "#a97f2c", (ur?26:21)*u, 1.95, y, colW);
       y+=10*u;
       y=lines(d.invite, (ur?"":"italic ")+((ur?25:19)*u)+"px "+body, "#5f4630", (ur?25:19)*u, ur?1.85:1.42, y, colW);
       y+=16*u;
@@ -511,13 +515,13 @@
       x.fillText("❦ ❧ ❦", cx, y); y+=30*u;
       y=lines(d.groom, (ur?"":"600 ")+((ur?47:40)*u)+"px "+serif, "#7C2A38", (ur?47:40)*u, ur?1.5:1.1, y, colW);
       y+=4*u;
-      y=lines(d.groomParent, (ur?"":"italic ")+((ur?23:17)*u)+"px "+body, "#6a4f2c", (ur?23:17)*u, ur?1.7:1.3, y, colW);
+      y=lines(d.groomParent, (ur?"":"italic 500 ")+((ur?22:18)*u)+"px "+parentFace, "#6a4f2c", (ur?22:18)*u, ur?1.7:1.32, y, colW);
       y+=10*u;
-      y=lines(d.withWord, (ur?"":"italic 600 ")+((ur?30:24)*u)+"px "+serif, "#9c7526", (ur?30:24)*u, ur?1.5:1.2, y, colW);
+      y=lines(d.withWord, (ur?"":"700 ")+((ur?30:50)*u)+"px "+linkFace, "#9c7526", (ur?30:50)*u, ur?1.7:0.98, y, colW);
       y+=6*u;
       y=lines(d.bride, (ur?"":"600 ")+((ur?47:40)*u)+"px "+serif, "#7C2A38", (ur?47:40)*u, ur?1.5:1.1, y, colW);
       y+=4*u;
-      y=lines(d.brideParent, (ur?"":"italic ")+((ur?23:17)*u)+"px "+body, "#6a4f2c", (ur?23:17)*u, ur?1.7:1.3, y, colW);
+      y=lines(d.brideParent, (ur?"":"italic 500 ")+((ur?22:18)*u)+"px "+parentFace, "#6a4f2c", (ur?22:18)*u, ur?1.7:1.32, y, colW);
       y+=22*u;
       // rule with a small ornament
       x.strokeStyle="#c8a24e"; x.lineWidth=Math.max(1,1*u);
