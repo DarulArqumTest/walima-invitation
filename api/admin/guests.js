@@ -37,6 +37,41 @@ export default async function handler(req, res) {
     const party = has('party_size') ? Math.max(0, Math.min(20, parseInt(b.party_size, 10) || 0)) : undefined;
     const note = has('host_note') ? (String(b.host_note || '').slice(0, 2000) || null) : undefined;
 
+    // Identity edits — for fixing a typo'd number or a missing name without having
+    // to delete the guest and lose their response.
+    try {
+      if (has('name')) {
+        const nm = String(b.name || '').trim();
+        if (!nm) { res.status(400).json({ ok: false, error: 'Name cannot be empty.' }); return; }
+        await sql`update guests set name = ${nm} where id = ${gid}`;
+      }
+      if (has('phone')) {
+        const ph = normPhone(b.phone);
+        const tail = ph.replace(/\D/g, '').slice(-10);
+        if (tail.length < 7) { res.status(400).json({ ok: false, error: 'That phone number looks too short.' }); return; }
+        // the gate matches on the last 10 digits, so a "different" string that
+        // resolves to an existing guest would let two rows share one identity
+        const clash = await sql`
+          select id from guests
+          where id <> ${gid} and right(regexp_replace(phone, '\\D', '', 'g'), 10) = ${tail}
+          limit 1`;
+        if (clash.rows[0]) { res.status(409).json({ ok: false, error: 'Another guest already has that number.' }); return; }
+        await sql`update guests set phone = ${ph} where id = ${gid}`;
+      }
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'Could not update those details.' }); return;
+    }
+
+    // Only touch the RSVP if the host actually changed something about it. Otherwise
+    // correcting a name would mint an empty locked RSVP and flip a guest who hasn't
+    // replied yet out of "No response".
+    const touchesRsvp = attending !== undefined || party !== undefined || note !== undefined;
+    if (!touchesRsvp) {
+      const g = await sql`select id, name, phone from guests where id = ${gid}`;
+      res.status(200).json({ ok: true, guest: g.rows[0] });
+      return;
+    }
+
     try {
       const cur = await sql`select id from rsvps where guest_id = ${gid} order by submitted_at desc limit 1`;
       let id = cur.rows[0] && cur.rows[0].id;

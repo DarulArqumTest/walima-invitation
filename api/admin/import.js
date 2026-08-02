@@ -27,16 +27,21 @@ export default async function handler(req, res) {
     const seen = new Set(existing.rows.map((r) => r.tail).filter(Boolean));
 
     let added = 0, skipped = 0, invalid = 0;
+    const invalidRows = [];
     const toAdd = [];
+    // so reported row numbers line up with the spreadsheet the host is looking at
+    const offset = Number(req.body && req.body.rowOffset) || 1;
+    let idx = -1;
 
     for (const r of rows) {
+      idx++;
       const name = String((r && r.name) || '').trim();
       const local = String((r && r.phone) || '').replace(/\D/g, '');
       let cc = String((r && r.cc) || '').trim();
       if (cc && cc[0] !== '+') cc = '+' + cc.replace(/\D/g, '');
       if (!cc) cc = '+1';                       // sensible default when the column is left blank
 
-      if (!name || !local) { invalid++; continue; }
+      if (!name || !local) { invalid++; invalidRows.push('row ' + (idx + offset) + (name ? ' – ' + name : '')); continue; }
 
       // If someone pasted the full international number into the phone column,
       // don't glue the dial code on a second time.
@@ -46,7 +51,7 @@ export default async function handler(req, res) {
         : (local.length > 10 && !r.cc) ? '+' + local
         : cc + local;
       const tail = tailOf(full);
-      if (tail.length < 7) { invalid++; continue; }
+      if (tail.length < 7) { invalid++; invalidRows.push('row ' + (idx + offset) + ' – ' + name); continue; }
       if (seen.has(tail)) { skipped++; continue; }   // already on the list, or repeated in this file
 
       seen.add(tail);
@@ -60,7 +65,7 @@ export default async function handler(req, res) {
       added++;
     }
 
-    res.status(200).json({ ok: true, added, skipped, invalid, total: rows.length });
+    res.status(200).json({ ok: true, added, skipped, invalid, invalidRows: invalidRows.slice(0, 40), total: rows.length });
   } catch (e) {
     res.status(500).json({ ok: false, error: 'Could not import that file.' });
   }

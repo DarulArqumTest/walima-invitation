@@ -181,6 +181,20 @@
     <div id="em-sub" class="who-sub"></div>
 
     <div class="fieldset">
+      <label>Name</label>
+      <input id="em-name-in" placeholder="Full name" style="width:100%">
+    </div>
+
+    <div class="fieldset">
+      <label>Phone</label>
+      <div style="display:flex;gap:8px">
+        <select id="em-cc" style="flex:0 0 auto"></select>
+        <input id="em-phone" inputmode="tel" placeholder="000 000 0000" style="flex:1">
+      </div>
+      <div class="hint">Fixing a number here keeps their response. The guest is matched on the last 10 digits.</div>
+    </div>
+
+    <div class="fieldset">
       <label>Attending</label>
       <div class="choice" id="em-att">
         <button data-v="yes" onclick="Admin.setAtt('yes')">Accepted</button>
@@ -342,17 +356,22 @@
         if(!rows.length){ st.textContent='That file was empty.'; input.value=''; return; }
         // drop a header row if present
         var first=rows[0].map(function(v){ return String(v).toLowerCase().trim(); });
-        if(first.join(',').indexOf('name')>=0 && first.join(',').indexOf('phone')>=0) rows.shift();
+        var rowOffset=1;
+        if(first.join(',').indexOf('name')>=0 && first.join(',').indexOf('phone')>=0){ rows.shift(); rowOffset=2; }
         var guests=rows.map(function(r){ return { name:(r[0]||'').trim(), cc:(r[1]||'').trim(), phone:(r[2]||'').trim() }; })
                        .filter(function(g){ return g.name || g.phone; });
         if(!guests.length){ st.textContent='No guest rows found.'; input.value=''; return; }
         st.textContent='Importing '+guests.length+'…';
-        api('/api/admin/import',{method:'POST',body:JSON.stringify({guests:guests})}).then(function(j){
+        api('/api/admin/import',{method:'POST',body:JSON.stringify({guests:guests,rowOffset:rowOffset})}).then(function(j){
           input.value='';
           if(j&&j.ok){
             var bits=[j.added+' added'];
             if(j.skipped) bits.push(j.skipped+' already on the list');
-            if(j.invalid) bits.push(j.invalid+' incomplete');
+            if(j.invalid) bits.push(j.invalid+' incomplete (skipped)');
+            if(j.invalidRows && j.invalidRows.length){
+              st.title='Incomplete rows: '+j.invalidRows.join(', ');
+              bits.push('hover for which');
+            }
             st.textContent=bits.join(' · ');
             Admin.refresh();
             setTimeout(function(){ st.textContent=''; },8000);
@@ -369,6 +388,19 @@
       if(!r) return;
       this._edit = { id:guestId, reqId:reqId||null, att:r.status==='accepted'?'yes':(r.status==='declined'?'no':'none') };
       $('em-name').textContent = r.name;
+      // identity fields — split the stored number back into dial code + local part
+      (function(){
+        var sel=$('em-cc'), list=window.WalimaDial||[];
+        if(sel && !sel.options.length){
+          sel.innerHTML = list.map(function(d){ return '<option value="'+d[1]+'">'+d[0]+' '+d[1]+'</option>'; }).join('');
+        }
+        $('em-name-in').value = r.name || '';
+        var digits = String(r.phone||'').replace(/\D/g,'');
+        var best = '';
+        list.forEach(function(d){ var c=d[1].replace(/\D/g,''); if(digits.length>10 && digits.indexOf(c)===0 && c.length>best.length) best=c; });
+        if(best){ sel.value='+'+best; $('em-phone').value=digits.slice(best.length); }
+        else { sel.value='+1'; $('em-phone').value=digits; }
+      })();
       $('em-sub').textContent  = r.phone + (r.message ? ' · “'+r.message+'”' : '');
       $('em-party').value = r.party || 1;
       $('em-note').value = '';
@@ -393,6 +425,12 @@
       var e=this._edit; if(!e) return;
       var att = e.att==='yes' ? true : (e.att==='no' ? false : null);
       var body = { guest_id:e.id, attending:att };
+      var nm=($('em-name-in').value||'').trim();
+      var localNo=($('em-phone').value||'').replace(/[^\d]/g,'');
+      if(!nm){ $('em-err').textContent='Name cannot be empty.'; $('em-err').style.display='block'; return; }
+      if(!localNo){ $('em-err').textContent='Phone number cannot be empty.'; $('em-err').style.display='block'; return; }
+      body.name = nm;
+      body.phone = ($('em-cc').value||'+1') + localNo;
       if(e.att==='yes') body.party_size = Math.max(1, Math.min(20, parseInt($('em-party').value,10)||1));
       else body.party_size = 0;
       var note = ($('em-note').value||'').trim();
